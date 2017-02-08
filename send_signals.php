@@ -11,5 +11,6 @@ if ($curl->error) {
     echo 'Response:' . "\n";
     var_dump($curl->response);
 }
-
+//Added composer command
+// composer require php-curl-class/php-curl-class
 // https://packagist.org/packages/php-curl-class/php-curl-class
