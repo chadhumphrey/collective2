@@ -2,7 +2,9 @@
 
 $truncate_trades="truncate trades;";
 
-function build_query($r){ $q = 'insert into trades (
+function build_query($r)
+{
+    $q = 'insert into trades (
         closeVWAP_timestamp,
         strike ,
         open_or_closed ,
@@ -48,7 +50,7 @@ function build_query($r){ $q = 'insert into trades (
 "'.$r->openedWhen.'",
 "'.$r->long_or_short.'",
 "'.$r->symbol_description.'")';
-return $q;
+    return $q;
 }
 
 $truncate_local_stocks= "TRUNCATE local_stocks;";
@@ -118,6 +120,7 @@ $update_price = "UPDATE collective2.local_stocks AS c2
     			stocks_bluesky.all_stocks_alt
     	)
     AND c2.long_or_short = 'long';";
+
   $update_short_trigger = "UPDATE collective2.local_stocks AS c2
     INNER JOIN stocks_bluesky.all_stocks_alt ON stocks_bluesky.all_stocks_alt.calc_equity = c2.symbol
     SET c2.exit_trigger = stocks_bluesky.all_stocks_alt.girt_mn_buy
@@ -129,3 +132,27 @@ $update_price = "UPDATE collective2.local_stocks AS c2
     			stocks_bluesky.all_stocks_alt
     	)
     AND c2.long_or_short = 'short';";
+
+  //Set exit points for stocks in portfolio
+  $set_safety_trades = "SELECT
+	symbol,
+	close_results,
+	long_or_short,
+  quant_opened,
+  trade_id,
+	stocks_bluesky.all_stocks_alt.girt_mn_buy,
+	stocks_bluesky.all_stocks_alt.girt_mn_sell
+  FROM `local_stocks`
+  INNER JOIN stocks_bluesky.all_stocks_alt ON stocks_bluesky.all_stocks_alt.calc_equity = local_stocks.symbol
+  WHERE stocks_bluesky.all_stocks_alt.date_results = CURRENT_DATE
+  and  local_stocks.symbol = 'mnst'" ;
+
+  function _db_error_test($results, $db, $line = null)
+  {
+      if (!$results) {
+          echo "ERROR:send_signals.php" . "\n";
+          echo "Line Number " . $line . "\n";
+          echo mysqli_error($db) . "\n";
+          die;
+      }
+  }

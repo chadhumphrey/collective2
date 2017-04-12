@@ -14,18 +14,51 @@ if (!$db) {
 use \Curl\Curl;
 
 $curl = new Curl();
- $arr = json_encode(array(
+
+$result = $db->query($set_safety_trades);
+_db_error_test($result, $db, "39");
+
+foreach ($result as $r) {
+    switch ($r['long_or_short']) {
+      case 'long':
+        $action = "STC";
+        $condition = "stop";
+        $exit_price = $r['girt_mn_sell'];
+        break;
+      case 'short':
+        $action = "BTC";
+        $condition = "limit";
+        $exit_price = $r[girt_mn_buy];
+        break;
+      default:
+        break;
+  }
+    echo $r['symbol'];
+
+//build signal array
+    $arr = json_encode(array(
    "apikey" => "HGHo2JKR2akIJdWtPRZU_LCLrYXAanVOgLLdoDOw28NcGr_v5e",
    "systemid" => "109963544",
    "signal" => array(
-          "market" => 1,
-  "symbol" => "AAPL",
-  "typeofsymbol" => "stock",
-  "action"=> "BTO",
-  "limit" => "99.99",
-  "duration" => "DAY",
-  "quant" => 2),
-));
+            "action" => "$action",
+            "symbol" => "$r[symbol]",
+            "typeofsymbol" => "stock",
+            "$condition" => "$exit_price",
+            "duration" => "DAY",
+            "quant" => $r[quant_opened],
+            "conitionalupon"=>$r['trade_id']
+          ),
+        )
+      );
+
+      $curl->setHeader('Content-Type', 'application/json');
+      $curl->verbose();
+      $curl->post('https://api.collective2.com/world/apiv3/submitSignal', $arr);
+      $response = $curl->response;
+      echo "kjhjk". var_dump($response)."\n";
+
+}
+die;
   // $arr = json_encode($arr);
   // var_dump($arr);die;
 // $curl->get('https://api.collective2.com/world/apiv3/getSystemDetails', $arr);
@@ -111,15 +144,15 @@ _db_error_test($result, $db, "76");
 $result = $db->query($update_short_trigger);
 _db_error_test($result, $db, "79");
 
-function _db_error_test($results, $db, $line = null)
-{
-    if (!$results) {
-        echo "ERROR:send_signals.php" . "\n";
-        echo "Line Number " . $line . "\n";
-        echo mysqli_error($db) . "\n";
-        die;
-    }
-}
+// function _db_error_test($results, $db, $line = null)
+// {
+//     if (!$results) {
+//         echo "ERROR:send_signals.php" . "\n";
+//         echo "Line Number " . $line . "\n";
+//         echo mysqli_error($db) . "\n";
+//         die;
+//     }
+// }
 // signal =>  array(action=>"SSHORT")
 // key :HGHo2JKR2akIJdWtPRZU_LCLrYXAanVOgLLdoDOw28NcGr_v5e
 // signalID 109603865
