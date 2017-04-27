@@ -1,8 +1,7 @@
 <?php
 /**
 **
-This script sets trades that are out of sync with the algorithm.
-Eventually this script will go away as all trades will be set daily.
+This script sets exit points for all stocks, regardless how far they are from the trigger point.
 **/
  require '/var/www/html/vendor/autoload.php';
 require_once("/var/www/stock_BlueSky/constants.php");
@@ -21,8 +20,8 @@ use \Curl\Curl;
 
 $curl = new Curl();
 
-$result = $db->query($set_safety_trades);
-_db_error_test($result, $db, "39");
+$result = $db->query($set_all_daily_trade_trigger);
+_db_error_test($result, $db, "24");
 
 foreach ($result as $r) {
     switch ($r['long_or_short']) {
@@ -33,7 +32,7 @@ foreach ($result as $r) {
         break;
       case 'short':
         $action = "BTC";
-        $condition = "stop";
+        $condition = "limit";
         $exit_price = $r[girt_mn_buy];
         break;
       default:

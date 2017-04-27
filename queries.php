@@ -54,6 +54,7 @@ function build_query($r)
 }
 
 $truncate_local_stocks= "TRUNCATE local_stocks;";
+$truncate_opt= "TRUNCATE opt;";
 
 $move_to_local= "INSERT INTO local_stocks (
 	symbol,
@@ -82,8 +83,69 @@ $move_to_local= "INSERT INTO local_stocks (
 	open_or_closed != 'closed'
   and putcall = '';";
 
+  $move_to_options= "INSERT INTO `opt` (
+	closeVWAP_timestamp,
+	strike,
+	open_or_closed,
+	expir,
+	openVWAP_timestamp,
+	underlying,
+	closing_price_VWAP,
+	putcall,
+	quant_closed,
+	markToMarket_time ,
+	opening_price_VWAP,
+	trade_id,
+	symbol,
+	quant_opened,
+	closedWhen,
+	instrument,
+	ptValue,
+	PL,
+	closedWhenUnixTimeStamp,
+	openedWhen,
+	long_or_short,
+	symbol_description
+) SELECT
+	closeVWAP_timestamp,
+	strike,
+	open_or_closed,
+	expir,
+	openVWAP_timestamp,
+	underlying,
+	closing_price_VWAP,
+	putcall,
+	quant_closed,
+	markToMarket_time ,
+	opening_price_VWAP,
+	trade_id,
+	symbol,
+	quant_opened,
+	closedWhen,
+	instrument,
+	ptValue,
+	PL,
+	closedWhenUnixTimeStamp,
+	openedWhen ,
+	long_or_short,
+	symbol_description
+FROM
+	trades
+WHERE
+	 putcall != '';";
+
 $update_algo= "UPDATE collective2.local_stocks AS c2
   INNER JOIN stocks_bluesky.all_stocks_alt ON stocks_bluesky.all_stocks_alt.calc_equity = c2.symbol
+  SET c2.SO_algo_action = stocks_bluesky.all_stocks_alt.action
+  WHERE
+  stocks_bluesky.all_stocks_alt.date_results = (
+  SELECT
+  max(date_results)
+  FROM
+  stocks_bluesky.all_stocks_alt);";
+
+  $update_algo_options = "UPDATE collective2.opt AS c2
+  INNER JOIN stocks_bluesky.all_stocks_alt ON stocks_bluesky.all_stocks_alt.calc_equity = LOWER(c2.underlying)
   SET c2.SO_algo_action = stocks_bluesky.all_stocks_alt.action
   WHERE
   stocks_bluesky.all_stocks_alt.date_results = (
@@ -133,19 +195,75 @@ $update_price = "UPDATE collective2.local_stocks AS c2
     	)
     AND c2.long_or_short = 'short';";
 
-  //Set exit points for stocks in portfolio
+  //Set exit points for stocks in portfolio that are out of sync
   $set_safety_trades = "SELECT
 	symbol,
 	close_results,
 	long_or_short,
-  quant_opened,
-  trade_id,
+	quant_opened,
+	trade_id,
 	stocks_bluesky.all_stocks_alt.girt_mn_buy,
 	stocks_bluesky.all_stocks_alt.girt_mn_sell
-  FROM `local_stocks`
+  FROM
+	`local_stocks`
   INNER JOIN stocks_bluesky.all_stocks_alt ON stocks_bluesky.all_stocks_alt.calc_equity = local_stocks.symbol
   WHERE stocks_bluesky.all_stocks_alt.date_results = CURRENT_DATE
-  and  local_stocks.symbol = 'mnst'" ;
+  AND long_or_short = 'long'
+  AND SO_algo_action = 'sell'
+  UNION
+	SELECT
+		symbol,
+		close_results,
+		long_or_short,
+		quant_opened,
+		trade_id,
+		stocks_bluesky.all_stocks_alt.girt_mn_buy,
+		stocks_bluesky.all_stocks_alt.girt_mn_sell
+	FROM
+		`local_stocks`
+	INNER JOIN stocks_bluesky.all_stocks_alt ON stocks_bluesky.all_stocks_alt.calc_equity = local_stocks.symbol
+	WHERE
+		stocks_bluesky.all_stocks_alt.date_results = CURRENT_DATE
+	AND long_or_short = 'short'
+	AND SO_algo_action = 'buy'" ;
+
+  //Set exit points for stocks in portfolio t
+  $set_all_daily_trade_trigger = "SELECT
+	symbol,
+	close_results,
+	long_or_short,
+	quant_opened,
+	trade_id,
+	stocks_bluesky.all_stocks_alt.girt_mn_buy,
+	stocks_bluesky.all_stocks_alt.girt_mn_sell
+  FROM
+	`local_stocks`
+  INNER JOIN stocks_bluesky.all_stocks_alt ON stocks_bluesky.all_stocks_alt.calc_equity = local_stocks.symbol
+  WHERE stocks_bluesky.all_stocks_alt.date_results = CURRENT_DATE;";
+
+  $open_option_trades = "SELECT
+	std,
+	20DMA_STD,
+	calc_equity,
+	close_results,
+	final_neo_score,
+	trade_duration,action
+  FROM
+	stocks_bluesky.all_stocks_alt
+  WHERE
+	trade_duration between 1 and 2
+  AND final_neo_score>0
+  AND date_results = CURRENT_DATE
+--  AND HV_20D > 20DMA_HV
+  AND std > 20DMA_STD
+  ORDER BY
+	action ASC limit 1";
+
+  function _option_symbol_query($act, $month)
+  {
+    $query = "select `$act` as symbol from options_symbols where id = $month";
+    return $query;
+  }
 
   function _db_error_test($results, $db, $line = null)
   {

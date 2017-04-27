@@ -78,15 +78,16 @@ _db_error_test($result, $db, "76");
 $result = $db->query($update_short_trigger);
 _db_error_test($result, $db, "79");
 
-function _db_error_test($results, $db, $line = null)
-{
-    if (!$results) {
-        echo "ERROR:send_signals.php" . "\n";
-        echo "Line Number " . $line . "\n";
-        echo mysqli_error($db) . "\n";
-        die;
-    }
-}
+//Options
+$result = $db->query($truncate_opt);
+_db_error_test($result, $db, "83");
+
+$result = $db->query($move_to_options);
+_db_error_test($result, $db, "86");
+
+$result = $db->query($update_algo_options);
+_db_error_test($result, $db, "89");
+
 // signal =>  array(action=>"SSHORT")
 // key :HGHo2JKR2akIJdWtPRZU_LCLrYXAanVOgLLdoDOw28NcGr_v5e
 // signalID 109603865
