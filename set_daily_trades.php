@@ -32,7 +32,7 @@ foreach ($result as $r) {
         break;
       case 'short':
         $action = "BTC";
-        $condition = "limit";
+        $condition = "stop";
         $exit_price = $r[girt_mn_buy];
         break;
       default:

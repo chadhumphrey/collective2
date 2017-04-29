@@ -1,12 +1,11 @@
 <?php
 /**
 **
-This script open options trades
+This script open options trades, only buys Calls & Puts does not sell to open.
 **/
- require '/var/www/html/vendor/autoload.php';
+require '/var/www/html/vendor/autoload.php';
 require_once("/var/www/stock_BlueSky/constants.php");
 include("queries.php");
-
 
 //New Mysqli Connection
 $db = mysqli_connect(DB_SERVER, DB_USER, DB_PASS, "collective2");
@@ -20,8 +19,8 @@ use \Curl\Curl;
 
 $curl = new Curl();
 
+//Get options one month in advance.
 $next_month = date('m', strtotime('+1 months'));
-//echo "blah--->" .$next_month . "\n";
 
 
 //$month_code = $db->query($option_query);
@@ -31,40 +30,50 @@ $next_month = date('m', strtotime('+1 months'));
 
 $result = $db->query($open_option_trades);
 _db_error_test($result, $db, "24");
+
+
 foreach ($result as $r) {
     switch ($r['action']) {
       case 'buy':
+      $strike = _get_strike($r['close_results'], "call");
         $action = "call";
+        $condition = "stop";
+        $transaction = "BTO";
+        $target_price = _get_mid_price($r['calc_equity'], $strike, "calls");
         break;
       case 'sell':
+      $strike = _get_strike($r['close_results'], "put");
         $action = "put";
+        $condition = "stop";
+        $transaction = "BTO";
+        $target_price = _get_mid_price($r['calc_equity'], $strike, "puts");
         break;
       default:
         break;
   }
-  $day = 19;
-  $year = 17;
-  $option_month_query =_option_symbol_query($action, $next_month);
-  $C2_option_month_symbol = $db->query($option_month_query)->fetch_object()->symbol;
-  // $C2_option_symbol = $result->fetch_object()->symbol;
-  _db_error_test($result, $db, "49");
-  echo "----> ". $C2_option_month_symbol . "\n";
-  $C2_option_symbol = strtoupper($r['calc_equity']).$year.$day.$C2_option_month_symbol."65";
-  echo $C2_option_symbol . "\n";
-  die;
+    $day = 19;
+    $year = 17;
+
+echo "this is target_price .". $target_price . " \n";
+die;
+
+    $option_month_query =_option_symbol_query($action, $next_month);
+    $C2_option_month_symbol = $db->query($option_month_query)->fetch_object()->symbol;
+    _db_error_test($result, $db, "49");
+    $C2_option_symbol = strtoupper($r['calc_equity']).$year.$day.$C2_option_month_symbol.$strike;
+
 
 //build signal array
-    $arr = json_encode(array(
+   $arr = json_encode(array(
    "apikey" => "HGHo2JKR2akIJdWtPRZU_LCLrYXAanVOgLLdoDOw28NcGr_v5e",
    "systemid" => "109963544",
    "signal" => array(
-            "action" => "$action",
-            "symbol" => "$r[symbol]",
-            "typeofsymbol" => "stock",
-            "$condition" => "$exit_price",
+            "action" => "$transaction",
+            "symbol" => "$C2_option_symbol",
+            "typeofsymbol" => "option",
+            "market" => 1,
             "duration" => "DAY",
-            "quant" => $r[quant_opened],
-            "conitionalupon"=>$r['trade_id']
+            "quant" => 1
           ),
         )
       );
