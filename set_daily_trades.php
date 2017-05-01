@@ -3,10 +3,13 @@
 **
 This script sets exit points for all stocks, regardless how far they are from the trigger point.
 **/
- require '/var/www/html/vendor/autoload.php';
+
+require '/var/www/html/vendor/autoload.php';
 require_once("/var/www/stock_BlueSky/constants.php");
+require_once("/var/www/html/collective2/calc.php");
 include("queries.php");
 
+$calc = new CALCULATION();
 
 //New Mysqli Connection
 $db = mysqli_connect(DB_SERVER, DB_USER, DB_PASS, "collective2");
@@ -17,11 +20,10 @@ if (!$db) {
     exit;
 }
 use \Curl\Curl;
-
 $curl = new Curl();
 
 $result = $db->query($set_all_daily_trade_trigger);
-_db_error_test($result, $db, "24");
+$calc->db_error_test($result, $db, "24");
 
 foreach ($result as $r) {
     switch ($r['long_or_short']) {

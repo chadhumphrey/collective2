@@ -272,7 +272,29 @@ UNION
   AND date_results = CURRENT_DATE
   AND std > 20DMA_STD limit 5);";
 
-  function _option_symbol_query($act, $month)
+  $load_equities_to_track_options = " insert ignore into equities_tracked (equity)
+	(select
+	calc_equity
+  FROM
+	stocks_bluesky.all_stocks_alt
+  WHERE
+	trade_duration between 1 and 2
+  AND final_neo_score>0
+  AND date_results = CURRENT_DATE
+  AND std > 20DMA_STD
+  limit 5)
+UNION
+(SELECT
+	calc_equity
+  FROM
+	stocks_bluesky.all_stocks_alt
+  WHERE
+	trade_duration between 1 and 2
+  AND final_neo_score < -1
+  AND date_results = CURRENT_DATE
+  AND std > 20DMA_STD limit 5);";
+
+  /*function _option_symbol_query($act, $month)
   {
       $query = "select `$act` as symbol from options_symbols where id = $month";
       return $query;
@@ -293,10 +315,10 @@ UNION
   function _get_mid_price($stock,$strike,$option){
     global $db;
     $table = "options2017.".$stock."_options";
-    echo $q ="SELECT midprice FROM $table where strike = $strike and opt_type = '$option' limit 1";
+    $q ="SELECT midprice FROM $table where strike = $strike and opt_type = '$option' limit 1";
     $midprice = $db->query($q)->fetch_object()->midprice;
     _db_error_test($midprice, $db, "298");
-    return $midprice;
+    return $midprice -.10;
   }
 
 
@@ -308,4 +330,4 @@ UNION
           echo mysqli_error($db) . "\n";
           die;
       }
-  }
+  }*/

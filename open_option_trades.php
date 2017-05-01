@@ -29,7 +29,7 @@ $next_month = date('m', strtotime('+1 months'));
 // $option_query =_option_symbol_query($act, $next_month);
 
 $result = $db->query($open_option_trades);
-_db_error_test($result, $db, "24");
+$calc->db_error_test($result, $db, "24");
 
 
 foreach ($result as $r) {
@@ -37,14 +37,14 @@ foreach ($result as $r) {
       case 'buy':
       $strike = _get_strike($r['close_results'], "call");
         $action = "call";
-        $condition = "stop";
+        $condition = "limit";
         $transaction = "BTO";
         $target_price = _get_mid_price($r['calc_equity'], $strike, "calls");
         break;
       case 'sell':
       $strike = _get_strike($r['close_results'], "put");
         $action = "put";
-        $condition = "stop";
+        $condition = "limit";
         $transaction = "BTO";
         $target_price = _get_mid_price($r['calc_equity'], $strike, "puts");
         break;
@@ -54,12 +54,12 @@ foreach ($result as $r) {
     $day = 19;
     $year = 17;
 
-echo "this is target_price .". $target_price . " \n";
-die;
+// echo "this is target_price ". $target_price . " \n";
+// die;
 
     $option_month_query =_option_symbol_query($action, $next_month);
     $C2_option_month_symbol = $db->query($option_month_query)->fetch_object()->symbol;
-    _db_error_test($result, $db, "49");
+    $calc->db_error_test($result, $db, "49");
     $C2_option_symbol = strtoupper($r['calc_equity']).$year.$day.$C2_option_month_symbol.$strike;
 
 
@@ -71,6 +71,7 @@ die;
             "action" => "$transaction",
             "symbol" => "$C2_option_symbol",
             "typeofsymbol" => "option",
+            "$condition" => "$target_price",
             "market" => 1,
             "duration" => "DAY",
             "quant" => 1
