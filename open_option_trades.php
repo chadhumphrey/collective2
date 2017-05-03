@@ -19,14 +19,11 @@ use \Curl\Curl;
 
 $curl = new Curl();
 
+require_once("/var/www/html/collective2/calc.php");
+$calc = new CALCULATION();
+
 //Get options one month in advance.
 $next_month = date('m', strtotime('+1 months'));
-
-
-//$month_code = $db->query($option_query);
-// _db_error_test($result, $db, "32");
-//echo "month_code ". $next_month;
-// $option_query =_option_symbol_query($act, $next_month);
 
 $result = $db->query($open_option_trades);
 $calc->db_error_test($result, $db, "24");
@@ -35,29 +32,33 @@ $calc->db_error_test($result, $db, "24");
 foreach ($result as $r) {
     switch ($r['action']) {
       case 'buy':
-      $strike = _get_strike($r['close_results'], "call");
+        $strike = $calc->get_strike($r['close_results'], "call");
         $action = "call";
         $condition = "limit";
         $transaction = "BTO";
-        $target_price = _get_mid_price($r['calc_equity'], $strike, "calls");
+        $target_price = $calc->get_mid_price($r['calc_equity'], $strike, "calls");
         break;
       case 'sell':
-      $strike = _get_strike($r['close_results'], "put");
+        $strike = $calc->get_strike($r['close_results'], "put");
         $action = "put";
         $condition = "limit";
         $transaction = "BTO";
-        $target_price = _get_mid_price($r['calc_equity'], $strike, "puts");
+        $target_price = $calc->get_mid_price($r['calc_equity'], $strike, "puts");
         break;
       default:
         break;
   }
-    $day = 19;
+    $day = 16;
     $year = 17;
+
+    if($target_price === null){
+      continue;
+    }
 
 // echo "this is target_price ". $target_price . " \n";
 // die;
 
-    $option_month_query =_option_symbol_query($action, $next_month);
+    $option_month_query =$calc->option_symbol_query($action, $next_month);
     $C2_option_month_symbol = $db->query($option_month_query)->fetch_object()->symbol;
     $calc->db_error_test($result, $db, "49");
     $C2_option_symbol = strtoupper($r['calc_equity']).$year.$day.$C2_option_month_symbol.$strike;
@@ -72,7 +73,6 @@ foreach ($result as $r) {
             "symbol" => "$C2_option_symbol",
             "typeofsymbol" => "option",
             "$condition" => "$target_price",
-            "market" => 1,
             "duration" => "DAY",
             "quant" => 1
           ),

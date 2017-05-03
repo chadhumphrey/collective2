@@ -50,7 +50,7 @@ class CALCULATION
           "'.$r->openedWhen.'",
           "'.$r->long_or_short.'",
           "'.$r->symbol_description.'")';
-          return $q;
+        return $q;
     }
 
     public function option_symbol_query($act, $month)
@@ -76,9 +76,13 @@ class CALCULATION
         global $db;
         $table = "options2017.".$stock."_options";
         $q ="SELECT midprice FROM $table where strike = $strike and opt_type = '$option' limit 1";
-        $midprice = $db->query($q)->fetch_object()->midprice;
-        _db_error_test($midprice, $db, "298");
-        return $midprice -.10;
+        $result = $db->query($q);
+        if (!empty($result)) {
+            $midprice = $result->fetch_object()->midprice;
+            return $midprice -.10;
+        } else {
+            return null;
+        }
     }
 
 
@@ -91,5 +95,4 @@ class CALCULATION
             die;
         }
     }
-
 } //end of class

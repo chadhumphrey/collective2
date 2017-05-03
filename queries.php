@@ -255,7 +255,10 @@ $update_price = "UPDATE collective2.local_stocks AS c2
   AND final_neo_score>0
   AND date_results = CURRENT_DATE
   AND std > 20DMA_STD
-  limit 5)
+  /*AND HV_20D > 20DMA_STD*/
+  AND calc_equity not in (select underlying from opt)
+  /*AND calc_equity != (select equity from options2017.equities_tracked where optionsAvailable = FALSE)*/
+  limit 7)
 UNION
 (SELECT
 	std,
@@ -270,9 +273,13 @@ UNION
 	trade_duration between 1 and 2
   AND final_neo_score < -1
   AND date_results = CURRENT_DATE
-  AND std > 20DMA_STD limit 5);";
+  AND std > 20DMA_STD
+  /*AND HV_20D > 20DMA_STD*/
+  AND calc_equity not in (select underlying from opt)
+  /*AND calc_equity != (select equity from options2017.equities_tracked where optionsAvailable = FALSE)*/
+  limit 7);";
 
-  $load_equities_to_track_options = " insert ignore into equities_tracked (equity)
+  $load_equities_to_track_options = "insert ignore into options2017.equities_tracked (equity)
 	(select
 	calc_equity
   FROM
@@ -282,7 +289,8 @@ UNION
   AND final_neo_score>0
   AND date_results = CURRENT_DATE
   AND std > 20DMA_STD
-  limit 5)
+  AND calc_equity not in (select underlying from collective2.opt)
+  limit 7)
 UNION
 (SELECT
 	calc_equity
@@ -292,42 +300,5 @@ UNION
 	trade_duration between 1 and 2
   AND final_neo_score < -1
   AND date_results = CURRENT_DATE
-  AND std > 20DMA_STD limit 5);";
-
-  /*function _option_symbol_query($act, $month)
-  {
-      $query = "select `$act` as symbol from options_symbols where id = $month";
-      return $query;
-  }
-
-  function _get_strike($price, $action)
-  {
-      if ($action == "call") {
-          $variable = (int)$price;
-          $variable += (-5 - ($variable % 5)) % 5;
-      } else {
-        $variable = (int)$price;
-        $variable += (5 - ($variable % 5)) % 5;
-      }
-      return $variable;
-  }
-
-  function _get_mid_price($stock,$strike,$option){
-    global $db;
-    $table = "options2017.".$stock."_options";
-    $q ="SELECT midprice FROM $table where strike = $strike and opt_type = '$option' limit 1";
-    $midprice = $db->query($q)->fetch_object()->midprice;
-    _db_error_test($midprice, $db, "298");
-    return $midprice -.10;
-  }
-
-
-  function _db_error_test($results, $db, $line = null)
-  {
-      if (!$results) {
-          echo "ERROR:send_signals.php" . "\n";
-          echo "Line Number " . $line . "\n";
-          echo mysqli_error($db) . "\n";
-          die;
-      }
-  }*/
+  AND calc_equity not in (select underlying from collective2.opt)
+  AND std > 20DMA_STD limit 7);";

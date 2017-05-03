@@ -4,7 +4,7 @@ include("queries.php");
 
 require_once("/var/www/html/collective2/calc.php");
 $calc = new CALCULATION();
-
+error_reporting(E_ALL);
 //Chart Section
 //New Mysqli Connection
 $db = mysqli_connect(DB_SERVER, DB_USER, DB_PASS, "collective2");
