@@ -91,6 +91,29 @@ $calc->db_error_test($result, $db, "86");
 $result = $db->query($update_algo_options);
 $calc->db_error_test($result, $db, "89");
 
+//Send to the EC2 then import file into database
+$ex = 'mysqldump -u root -pbenny collective2 local_stocks > /var/www/stock_BlueSky/version_two/portfolios/table_dump/local_stocks.sql ';
+$ex2 = 'mysqldump -u root -pbenny collective2 opt >         /var/www/stock_BlueSky/version_two/portfolios/table_dump/opt.sql';
+echo exec($ex);
+echo exec($ex2);
+
+$ex = 'node /var/www/html/amazon/admin/send_table_to_web.js local_stocks';
+    echo "\n" . $ex . "\n";
+    echo exec($ex);
+$ex = 'node /var/www/html/amazon/admin/send_table_to_web.js opt';
+    echo "\n" . $ex . "\n";
+    echo exec($ex);
+
+    $ex = 'cd /var/www/stock_BlueSky/load_initial_stocks/ && php upload_table.php local_stocks';
+    echo exec($ex);
+
+  $ex = 'cd /var/www/stock_BlueSky/load_initial_stocks/ && php upload_table.php opt';
+    echo exec($ex);
+
+  $date = date('Y-m-d H:i:s');
+  echo "The time is: ".$date = date('Y-m-d H:i:s') . "\n";  
+
+/*Notes*/
 // signal =>  array(action=>"SSHORT")
 // key :HGHo2JKR2akIJdWtPRZU_LCLrYXAanVOgLLdoDOw28NcGr_v5e
 // signalID 109603865

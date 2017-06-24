@@ -71,15 +71,44 @@ class CALCULATION
         return $variable;
     }
 
-    public function get_mid_price($stock, $strike, $option)
+    public function validate_expiration($stock, $strike, $option, $current_expiration, $secondary_expiration)
     {
         global $db;
         $table = "options2017.".$stock."_options";
-        $q ="SELECT midprice FROM $table where strike = $strike and opt_type = '$option' limit 1";
+        $q ='SELECT * FROM '.$table.' where strike = '.$strike.' and opt_type = "'.$option.'" and ex_date = "'.$current_expiration.'"  limit 1';
+        echo "-----> ". $q . " <-----";
+        $result = $db->query($q);
+        if (mysqli_num_rows($result) > 0) {
+            return $current_expiration;
+        } else {
+            $q2 ='SELECT * FROM '.$table.' where strike = '.$strike.' and opt_type = "'.$option.'" and ex_date = "'.$secondary_expiration.'"  limit 1';
+            $result2 = $db->query($q2);
+            if (mysqli_num_rows($result2) > 0) {
+                return $secondary_expiration;
+            } else {
+                return "2018-01-19";
+            }
+        }
+    }
+
+    public function get_mid_price($stock, $strike, $option,$exDate)
+    {
+        global $db;
+        $table = "options2017.".$stock."_options";
+        $q ="SELECT midprice FROM $table where strike = $strike and opt_type = '$option' and ex_date = '$exDate' limit 1";
+        echo $q . " <-----\n";
         $result = $db->query($q);
         if (!empty($result)) {
             $midprice = $result->fetch_object()->midprice;
-            return $midprice -.10;
+            if ($midprice <= 0) {
+                $q ="SELECT last FROM $table where strike = $strike and opt_type = '$option' and ex_date = '$exDate' limit 1";
+                echo $q . " <-----\n";
+                $result = $db->query($q);
+                $last_price = $result->fetch_object()->last;
+                return $last_price - .10;
+            } else {
+                return $midprice -.10;
+            }
         } else {
             return null;
         }

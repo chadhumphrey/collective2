@@ -28,7 +28,8 @@ $next_month = date('m', strtotime('+1 months'));
 $result = $db->query($open_option_trades);
 $calc->db_error_test($result, $db, "24");
 
-
+$current_expiration = "2017-11-17";
+$secondary_expiration = "2017-12-15";
 foreach ($result as $r) {
     switch ($r['action']) {
       case 'buy':
@@ -36,32 +37,36 @@ foreach ($result as $r) {
         $action = "call";
         $condition = "limit";
         $transaction = "BTO";
-        $target_price = $calc->get_mid_price($r['calc_equity'], $strike, "calls");
+        $exDate = $calc->validate_expiration($r['calc_equity'], $strike,"call", $current_expiration, $secondary_expiration);
+        $target_price = $calc->get_mid_price($r['calc_equity'], $strike, "call",$exDate);
+
         break;
       case 'sell':
-        $strike = $calc->get_strike($r['close_results'], "put");
+        $strike = $calc->get_strike($r['close_results'], "put",$exDate);
         $action = "put";
         $condition = "limit";
         $transaction = "BTO";
-        $target_price = $calc->get_mid_price($r['calc_equity'], $strike, "puts");
+        $exDate = $calc->validate_expiration($r['calc_equity'], $strike, "put",$current_expiration, $secondary_expiration);
+        $target_price = $calc->get_mid_price($r['calc_equity'], $strike, "put",$exDate);
+
         break;
       default:
         break;
   }
-    $day = 16;
-    $year = 17;
 
-    if($target_price === null){
+
+    if($target_price === null XOR $target_price < 0){
       continue;
     }
 
-// echo "this is target_price ". $target_price . " \n";
-// die;
+    //Parse Expiration Date
+    $d = date_parse($exDate);
+    $year = date('y', strtotime($exDate));
 
-    $option_month_query =$calc->option_symbol_query($action, $next_month);
+    $option_month_query =$calc->option_symbol_query($action, $d['month']);
     $C2_option_month_symbol = $db->query($option_month_query)->fetch_object()->symbol;
     $calc->db_error_test($result, $db, "49");
-    $C2_option_symbol = strtoupper($r['calc_equity']).$year.$day.$C2_option_month_symbol.$strike;
+    $C2_option_symbol = strtoupper(trim($r['calc_equity'])).$year.$d['day'].$C2_option_month_symbol.$strike;
 
 
 //build signal array
@@ -78,9 +83,11 @@ foreach ($result as $r) {
           ),
         )
       );
+  // var_dump(json_decode($arr));
+  // echo "\n\n\n\n";die;
 
     $curl->setHeader('Content-Type', 'application/json');
-    $curl->verbose();
+    /*$curl->verbose();*/
     $curl->post('https://api.collective2.com/world/apiv3/submitSignal', $arr);
     $response = $curl->response;
     var_dump($response)."\n";

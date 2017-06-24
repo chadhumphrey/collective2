@@ -132,7 +132,7 @@ $move_to_local= "INSERT INTO local_stocks (
 FROM
 	trades
 WHERE
-	 putcall != '';";
+	 putcall != '' and open_or_closed != 'closed';";
 
 $update_algo= "UPDATE collective2.local_stocks AS c2
   INNER JOIN stocks_bluesky.all_stocks_alt ON stocks_bluesky.all_stocks_alt.calc_equity = c2.symbol
@@ -241,64 +241,60 @@ $update_price = "UPDATE collective2.local_stocks AS c2
   INNER JOIN stocks_bluesky.all_stocks_alt ON stocks_bluesky.all_stocks_alt.calc_equity = local_stocks.symbol
   WHERE stocks_bluesky.all_stocks_alt.date_results = CURRENT_DATE;";
 
-  $open_option_trades = "(SELECT
-	std,
-	20DMA_STD,
-	calc_equity,
-	close_results,
-	final_neo_score,
-	trade_duration,action
+  $open_option_trades = "SELECT
+		*
   FROM
 	stocks_bluesky.all_stocks_alt
   WHERE
-	trade_duration between 1 and 2
-  AND final_neo_score>0
+	trade_duration BETWEEN 1
+  AND 5
+  AND final_neo_score > 1
   AND date_results = CURRENT_DATE
-  AND std > 20DMA_STD
-  /*AND HV_20D > 20DMA_STD*/
-  AND calc_equity not in (select underlying from opt)
-  /*AND calc_equity != (select equity from options2017.equities_tracked where optionsAvailable = FALSE)*/
-  limit 7)
-UNION
-(SELECT
-	std,
-	20DMA_STD,
-	calc_equity,
-	close_results,
-	final_neo_score,
-	trade_duration,action
-  FROM
-	stocks_bluesky.all_stocks_alt
-  WHERE
-	trade_duration between 1 and 2
-  AND final_neo_score < -1
-  AND date_results = CURRENT_DATE
-  AND std > 20DMA_STD
-  /*AND HV_20D > 20DMA_STD*/
-  AND calc_equity not in (select underlying from opt)
-  /*AND calc_equity != (select equity from options2017.equities_tracked where optionsAvailable = FALSE)*/
-  limit 7);";
+  AND HV_20D > 20DMA_HV
+  AND std >20DMA_STD
+  AND (std - 20DMA_STD) > .05
+  UNION
+  SELECT
+  	*
+    FROM
+  	stocks_bluesky.all_stocks_alt
+    WHERE
+  	trade_duration BETWEEN 1
+    AND 5
+    AND final_neo_score< 1
+    AND date_results = CURRENT_DATE
+    AND HV_20D > 20DMA_HV
+    AND std >20DMA_STD
+    AND (std - 20DMA_STD) > .05 ";
+
+
 
   $load_equities_to_track_options = "insert ignore into options2017.equities_tracked (equity)
-	(select
+  SELECT
 	calc_equity
   FROM
 	stocks_bluesky.all_stocks_alt
   WHERE
-	trade_duration between 1 and 2
-  AND final_neo_score>0
+	trade_duration BETWEEN 1
+  AND 2
+  AND final_neo_score > 1
   AND date_results = CURRENT_DATE
-  AND std > 20DMA_STD
-  AND calc_equity not in (select underlying from collective2.opt)
-  limit 7)
+  AND HV_20D > 20DMA_HV
+  AND std >20DMA_STD
+  AND (std - 20DMA_STD) > .05
 UNION
-(SELECT
+SELECT
 	calc_equity
   FROM
 	stocks_bluesky.all_stocks_alt
   WHERE
-	trade_duration between 1 and 2
-  AND final_neo_score < -1
+	trade_duration BETWEEN 1
+  AND 2
+  AND final_neo_score< 1
   AND date_results = CURRENT_DATE
-  AND calc_equity not in (select underlying from collective2.opt)
-  AND std > 20DMA_STD limit 7);";
+  AND HV_20D > 20DMA_HV
+  AND std >20DMA_STD
+  AND (std - 20DMA_STD) > .05";
+
+ $options_out_of_sync = "select * from collective2.opt_out_of_sync where new_quant != FALSE or new_quant is null";
+ $send_out_sync_options ="select * from collective2.opt_out_of_sync";
