@@ -249,11 +249,10 @@ $update_price = "UPDATE collective2.local_stocks AS c2
 	trade_duration BETWEEN 1
   AND 5
   AND final_neo_score > 1
-  AND date_results = CURRENT_DATE
+  AND date_results = '2017-06-23'
   AND HV_20D > 20DMA_HV
   AND std >20DMA_STD
-  AND (std - 20DMA_STD) > .05
-  UNION
+  AND (std - 20DMA_STD) > .25  UNION
   SELECT
   	*
     FROM
@@ -262,10 +261,10 @@ $update_price = "UPDATE collective2.local_stocks AS c2
   	trade_duration BETWEEN 1
     AND 5
     AND final_neo_score< 1
-    AND date_results = CURRENT_DATE
+    AND date_results = '2017-06-23'
     AND HV_20D > 20DMA_HV
     AND std >20DMA_STD
-    AND (std - 20DMA_STD) > .05 ";
+    AND (std - 20DMA_STD) > .25 ";
 
 
 

@@ -30,6 +30,7 @@ $number = mysqli_num_rows($result);
 $xx =0;
 if (($number) > 0) {
     while ($row = mysqli_fetch_assoc($result)) {
+        echo  $row['equity'] . "\n";
         $stock = $row['equity'];
         $q = "SELECT * FROM stocks_bluesky.all_stocks_alt, options2017.equities_tracked
         WHERE options2017.equities_tracked.equity = '$stock'
@@ -42,7 +43,19 @@ if (($number) > 0) {
         $price = $r->fetch_object()->close_results;
 
         $table = "options2017.".$stock."_options";
-        $q ='insert into options_VOL () SELECT * FROM '.$table.' where strike between '.($price - 10).' and '.($price + 10).' and ivol > (HV_20D + 5)';
+        //$q ='insert into options_VOL () SELECT * FROM '.$table.' where strike between '.($price - 10).' and '.($price + 10).' and ivol > (HV_20D + 5)';
+        $q ='insert into options_VOL () SELECT * FROM '.$table.'
+        WHERE
+        last != 0
+        and ivol > (HV_20D +10)
+        and strike between current_price - 50 and current_price +50
+        and "2017-06-23" != ex_date
+        and "2017-06-30" != ex_date
+        and last > 2
+        and last - ((bid+ ask)/2) >1
+        ORDER BY
+        ex_date,equity DESC';
+
         $rr = $db->query($q);
         $calc->db_error_test($rr, $db, "49");
     }
