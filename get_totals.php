@@ -1,5 +1,5 @@
 <?php require '/var/www/html/vendor/autoload.php';
-require_once("/var/www/stock_BlueSky/constants.php");
+require_once("/var/www/html/stocks/constants.php");
 include("queries.php");
 
 require_once("/var/www/html/collective2/calc.php");

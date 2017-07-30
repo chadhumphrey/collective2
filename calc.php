@@ -59,6 +59,15 @@ class CALCULATION
         return $query;
     }
 
+    public function add_zero_digit($day)
+    {
+        if ($day<10) {
+            $d = "0".$day;
+            return $d;
+        }
+        return $day;
+    }
+
     public function get_strike($price, $action)
     {
         if ($action == "call") {
@@ -76,7 +85,6 @@ class CALCULATION
         global $db;
         $table = "options2017.".$stock."_options";
         $q ='SELECT * FROM '.$table.' where strike = '.$strike.' and opt_type = "'.$option.'" and ex_date = "'.$current_expiration.'"  limit 1';
-        echo "-----> ". $q . " <-----";
         $result = $db->query($q);
         if (mysqli_num_rows($result) > 0) {
             return $current_expiration;
@@ -91,12 +99,11 @@ class CALCULATION
         }
     }
 
-    public function get_mid_price($stock, $strike, $option,$exDate)
+    public function get_mid_price($stock, $strike, $option, $exDate)
     {
         global $db;
         $table = "options2017.".$stock."_options";
         $q ="SELECT midprice FROM $table where strike = $strike and opt_type = '$option' and ex_date = '$exDate' limit 1";
-        echo $q . " <-----\n";
         $result = $db->query($q);
         if (!empty($result)) {
             $midprice = $result->fetch_object()->midprice;
@@ -113,6 +120,37 @@ class CALCULATION
             return null;
         }
     }
+    public function strike_type($strike)
+    {
+        if (strpos($strike, ".")) {
+            $remainder = substr($strike, strpos($strike, ".") + 1);
+            if ($remainder == "50") {
+                $strike = substr($strike, 0, -1);
+                return $strike;
+            } else {
+                $strike = str_replace(".00", "", $strike);
+                return $strike;
+            }
+        }
+    }
+
+    public function eval_price($data)
+    {
+      switch (true) {
+        case ($data['putcall'] == 'call' && $data[long_or_short] == 'long'):
+
+
+
+        if($data['PL'])
+          $calc->eval_price($r);
+          break;
+
+        default:
+          # code...
+          break;
+      }
+    }
+
 
 
     public function db_error_test($results, $db, $line = null)
@@ -121,7 +159,7 @@ class CALCULATION
             echo "ERROR:send_signals.php" . "\n";
             echo "Line Number " . $line . "\n";
             echo mysqli_error($db) . "\n";
-            die;
+            return "fail";
         }
     }
 } //end of class
