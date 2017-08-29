@@ -120,6 +120,7 @@ class CALCULATION
             return null;
         }
     }
+
     public function strike_type($strike)
     {
         if (strpos($strike, ".")) {
@@ -136,27 +137,89 @@ class CALCULATION
 
     public function eval_price($data)
     {
-      switch (true) {
-        case ($data['putcall'] == 'call' && $data[long_or_short] == 'long'):
+        global $db;
+        switch ($data['putcall']) {
+          case 'call':
+            $option = "C";
+            $opt = "call";
+            break;
+          case 'put':
+            $option = "P";
+            $opt = "put";
+            break;
+          default:
+              $opt =$option = "FAIL";
+            break;
+        }
+
+        $x = str_replace($data['underlying'], "", $data['symbol']);
+        $year = substr($x, 0, 2);
+        $day = substr($x, 2, 2);
+        $tempMonth = $x[4];
+
+        echo $q="select id from collective2.options_symbols where `$opt` = '$tempMonth';";
+        $month = $db->query($q)->fetch_object()->id;
+        echo strlen($month) . "<----\n";
+        echo (float)$data['strike']. "\n";
+
+        //Single digit months
+        if (strlen($month)<2) {
+            echo "single digit\n";
+            $month = sprintf("%02d", $month);
+        }
+
+        $s = (float)$data['strike'] ;
+
+        //if the strike has a decimal
+        if (fmod((float)$data['strike'], 1)) {
+            echo "we made it here \n";
+            $strike =(float)$data['strike'] *10;
+            $strike = "00".$data['strike']."00";
+            $strike = str_replace(".", "", $strike);
+        }
 
 
+        if (strlen($data['strike'])==2) {
+            $strike = "000".$data['strike']."000";
+        }
+        if (strlen($data['strike'])==3) {
+            $strike = "00".$data['strike']."000";
+        }
+        echo "Strike---->".$strike . "\n";
+        echo "Day---->".$day . "\n";
+        // die;
+        //$option = "C";
+        //BMY170728C00080000
 
-        if($data['PL'])
-          $calc->eval_price($r);
-          break;
-
-        default:
-          # code...
-          break;
-      }
+        $realOptionSymbol = $data['underlying'].$year.$month.$day.$option.$strike;
+        echo $realOptionSymbol . "\n";
+        return $realOptionSymbol;
     }
 
+    public function update_price($r, $midPrice)
+    {
+        global $db;
+        echo "midPrice--> ". $midPrice . "\n";
+        echo "start price --> ". $r['opening_price_VWAP'] . "\n";
+        if ($r['long_or_short']=="long") {
+            $profit_precent = (($midPrice - $r['opening_price_VWAP']) / $r['opening_price_VWAP']) *100;
+            $profit = ($midPrice - $r['opening_price_VWAP']) *100 * $r['quant_opened'];
+        } else {
+            $profit_precent = (($r['opening_price_VWAP'] -$midPrice)   / $r['opening_price_VWAP']) *100;
+            $profit = ($r['opening_price_VWAP']- $midPrice) *100 * $r['quant_opened'];
+        }
+        echo "% profit--> ". $profit . "\n";
+
+        $q = "update opt set actual_midPrice = $midPrice, profit_precent = $profit_precent, profit = $profit where id = $r[id];";
+        $result = $db->query($q);
+        $this->db_error_test($result, $db, "214");
+    }
 
 
     public function db_error_test($results, $db, $line = null)
     {
         if (!$results) {
-            echo "ERROR:send_signals.php" . "\n";
+            echo "ERROR:calc.php" . "\n";
             echo "Line Number " . $line . "\n";
             echo mysqli_error($db) . "\n";
             return "fail";

@@ -24,10 +24,10 @@ $calc = new CALCULATION();
 
 //Get options one month in advance.
 $next_month = date('m', strtotime('+1 months'));
-$array_ids = array('AZO170922C00562500','AZO170922C00575000','TDG171117P00230000');
-$precent_increase = .95;
+$array_ids = array('CHTR180316C00410000','AAP180316P00075000');
+$precent_increase = 1.0;
 foreach ($array_ids as $id) {
-    $q = 'select * from options2017.options_HighIVOL where symbol = "'.$id.'"';
+    $q = 'select * from options2017.options_LowIVOL where symbol = "'.$id.'"';
     $result = $db->query($q);
     $calc->db_error_test($result, $db, "29");
 
@@ -35,7 +35,7 @@ foreach ($array_ids as $id) {
     foreach ($result as $r) {
         //log trade
         $date = date('Y-m-d', time());
-        echo $q = 'insert into options2017.traded_option (symbol, date_of_quote) value ("'.$id.'", "'.$date.'" );';
+        echo $q = 'insert into options2017.traded_option (symbol, date_of_quote) value ("'.$id.'", "'.$date.'");';
         $insert = $db->query($q);
         $calc->db_error_test($insert, $db, "41");
 
@@ -43,16 +43,16 @@ foreach ($array_ids as $id) {
       case 'call':
         $strike =$calc->strike_type($r['strike']);
         $action = "call";
-        $condition = "limit";
-        $transaction = "STO";
+        $condition = "stop";
+        $transaction = "BTO";
         $exDate = $r['ex_date'];
         $target_price = (($r['bid']+$r['ask'])/2)*$precent_increase;
         break;
       case 'put':
         $strike =$calc->strike_type($r['strike']);
         $action = "put";
-        $condition = "limit";
-        $transaction = "STO";
+        $condition = "stop";
+        $transaction = "BTO";
         $exDate = $r['ex_date'];
         $target_price = (($r['bid']+$r['ask'])/2)*$precent_increase;
         break;
@@ -83,16 +83,17 @@ foreach ($array_ids as $id) {
             "typeofsymbol" => "option",
             "$condition" => "$target_price",
             "duration" => "DAY",
-            "quant" => 2
+            "quant" => 1
           ),
         )
       );
-        //var_dump(json_decode($arr));
+      //  var_dump(json_decode($arr));
         echo "\n\n\n\n";
+        // sleep(5);
 
         $curl->setHeader('Content-Type', 'application/json');
         $curl->post('https://api.collective2.com/world/apiv3/submitSignal', $arr);
         $response = $curl->response;
-        // var_dump($response)."\n";
+        var_dump($response)."\n";
     } //foreach results
 } //foreach array_ids

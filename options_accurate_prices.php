@@ -31,25 +31,28 @@ foreach ($result as $r) {
 
     echo $realOptionSymbol . "\n";
     $table = strtolower($r['underlying'])."_options";
-    $q= "select * from options2017.$table where symbol = '$realOptionSymbol';";
+    echo $q= "select * from options2017.$table where symbol = '$realOptionSymbol';";
     $optionData = $db->query($q);
     while ($obj = $optionData->fetch_object()) {
-      // $ask = $obj->ask;
+        // $ask = $obj->ask;
       // $bid = $obj->bid;
       $midPrice = ($obj->ask + $obj->bid)/2;
-        }
+    }
 
     /*$bid = $optionPrice->fetch_object()->bid;
     $ask = $optionPrice->fetch_object()->ask;
     echo "--> ". $bid . "\n";*/
-    echo "midPrice--> ". $midPrice . "\n";
-    echo "start price --> ". $r['opening_price_VWAP'] . "\n";
+    // echo "midPrice--> ". $midPrice . "\n";
+    // echo "start price --> ". $r['opening_price_VWAP'] . "\n";
+    //
+    // $profit = (($midPrice - $r['opening_price_VWAP']) / $r['opening_price_VWAP']) *100;
+    // echo "% profit--> ". $profit . "\n";
 
-    $profit = (($midPrice - $r['opening_price_VWAP']) / $r['opening_price_VWAP']) *100;
-    echo "% profit--> ". $profit . "\n";
+    $realOptionSymbol = $calc->update_price($r, $midPrice);
+
     // var_dump($optionPrice->fetch_object());
 
-    die;
+    // die;
 }
 
 //   switch (true) {

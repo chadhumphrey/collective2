@@ -5,7 +5,7 @@ This script sets exit points for all stocks, regardless how far they are from th
 **/
 
 require '/var/www/html/vendor/autoload.php';
-require_once("/var/www/stock_BlueSky/constants.php");
+require_once("/var/www/html/stocks/constants.php");
 require_once("/var/www/html/collective2/calc.php");
 include("queries.php");
 
@@ -35,13 +35,15 @@ foreach ($result as $r) {
       case 'short':
         $action = "BTC";
         $condition = "stop";
-        $exit_price = $r[girt_mn_buy];
+        $exit_price = $r['girt_mn_buy'];
         break;
       default:
         break;
   }
     echo $r['symbol'];
-
+    if($exit_price == 0){
+      continue;
+    }
 //build signal array
     $arr = json_encode(array(
    "apikey" => "HGHo2JKR2akIJdWtPRZU_LCLrYXAanVOgLLdoDOw28NcGr_v5e",

@@ -20,7 +20,7 @@ require_once("/var/www/html/collective2/calc.php");
 $calc = new CALCULATION();
 
 
-$q = "truncate options_HighVOL;";
+$q = "truncate options_HighIVOL;";
 $result = $db->query($q);
 $calc->db_error_test($result, $db, "25");
 
@@ -43,14 +43,10 @@ if (($number) > 0) {
         $price = $r->fetch_object()->close_results;
 
         $table = "options2017.".$stock."_options";
-        //$q ='insert into options_VOL () SELECT * FROM '.$table.' where strike between '.($price - 10).' and '.($price + 10).' and ivol > (HV_20D + 5)';
-        $q ='insert into options_HighVOL () SELECT * FROM '.$table.'
-        WHERE
-        last != 0
-        and ivol > (HV_20D +10)
+        $q ='insert into options_HighIVOL () SELECT * FROM '.$table.'
+        WHERE  last != 0
+        and ally_IVOL * 100 > (HV_20D +10)
         and strike between current_price - 50 and current_price +50
-        and "2017-06-23" != ex_date
-        and "2017-06-30" != ex_date
         and last > 2
         and last - ((bid+ ask)/2) >1
         ORDER BY

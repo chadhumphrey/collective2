@@ -297,4 +297,4 @@ SELECT
 
  $options_out_of_sync = "select * from collective2.opt_out_of_sync where new_quant != FALSE or new_quant is null";
  $send_out_sync_options ="select * from collective2.opt_out_of_sync";
- $get_all_open_options ="select * from collective2.opt where id = 1";
+ $get_all_open_options ="select * from collective2.opt ";
