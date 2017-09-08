@@ -7,6 +7,12 @@ require '/var/www/html/vendor/autoload.php';
 require_once("/var/www/html/stocks/constants.php");
 include("queries.php");
 
+use \Curl\Curl;
+$curl = new Curl();
+
+require_once("/var/www/html/collective2/calc.php");
+$calc = new CALCULATION();
+
 //New Mysqli Connection
 $db = mysqli_connect(DB_SERVER, DB_USER, DB_PASS, "collective2");
 if (!$db) {
@@ -15,16 +21,11 @@ if (!$db) {
     echo "Debugging error: " . mysqli_connect_error() . PHP_EOL;
     exit;
 }
-use \Curl\Curl;
 
-$curl = new Curl();
+$systemId = $calc->get_system($argv[1]);
 
-require_once("/var/www/html/collective2/calc.php");
-$calc = new CALCULATION();
-
-//Get options one month in advance.
-$next_month = date('m', strtotime('+1 months'));
-$array_ids = array('CHTR180316C00410000','AAP180316P00075000');
+//option array
+$array_ids = array('SVXY180316C00117000','TDG180119C00300000','RE180420C00240000','ULTA180420P00210000');
 $precent_increase = 1.0;
 foreach ($array_ids as $id) {
     $q = 'select * from options2017.options_LowIVOL where symbol = "'.$id.'"';
@@ -76,7 +77,7 @@ foreach ($array_ids as $id) {
     //build signal array
     $arr = json_encode(array(
       "apikey" => "HGHo2JKR2akIJdWtPRZU_LCLrYXAanVOgLLdoDOw28NcGr_v5e",
-      "systemid" => "109963544",
+      "systemid" => $systemId,
       "signal" => array(
             "action" => "$transaction",
             "symbol" => "$C2_option_symbol",

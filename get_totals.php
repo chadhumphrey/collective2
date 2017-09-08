@@ -4,8 +4,12 @@ include("queries.php");
 
 require_once("/var/www/html/collective2/calc.php");
 $calc = new CALCULATION();
+use \Curl\Curl;
+
+$curl = new Curl();
+
 error_reporting(E_ALL);
-//Chart Section
+
 //New Mysqli Connection
 $db = mysqli_connect(DB_SERVER, DB_USER, DB_PASS, "collective2");
 if (!$db) {
@@ -14,12 +18,14 @@ if (!$db) {
     echo "Debugging error: " . mysqli_connect_error() . PHP_EOL;
     exit;
 }
-use \Curl\Curl;
 
-$curl = new Curl();
+//Get user input on tables
+$systemId = $calc->get_system($argv[1]);
+$systemTable = $calc->get_system_table($argv[1]);
+
 $arr = array(
   'apikey' => "HGHo2JKR2akIJdWtPRZU_LCLrYXAanVOgLLdoDOw28NcGr_v5e",
-  'systemid' => "109963544",
+  'systemid' => $systemId
   );
 // $curl->get('https://api.collective2.com/world/apiv3/getSystemDetails', $arr);
 // $curl->get('https://api.collective2.com/world/apiv3/requestMarginEquity', $arr);
@@ -91,27 +97,45 @@ $calc->db_error_test($result, $db, "86");
 $result = $db->query($update_algo_options);
 $calc->db_error_test($result, $db, "89");
 
+//Section below is where the tables / systems split
+$optTable = $systemTable."_opt";
+$q = "truncate $systemTable  ";
+$result = $db->query($q);
+$calc->db_error_test($result, $db, "102");
+
+$q = "truncate $optTable  ";
+$result = $db->query($q);
+$calc->db_error_test($result, $db, "108");
+
+echo $q = "insert into $systemTable () select * from local_stocks; ";
+$result = $db->query($q);
+$calc->db_error_test($result, $db, "113");
+
+echo $q = "insert into $optTable () select * from opt; ";
+$result = $db->query($q);
+$calc->db_error_test($result, $db, "117");
+
 //Send to the EC2 then import file into database
-$ex = 'mysqldump -u root -pbenny collective2 local_stocks > /var/www/stock_BlueSky/version_two/portfolios/table_dump/local_stocks.sql ';
-$ex2 = 'mysqldump -u root -pbenny collective2 opt >         /var/www/stock_BlueSky/version_two/portfolios/table_dump/opt.sql';
+$ex = 'mysqldump -u root -pbenny collective2 '.$systemTable.' > /var/www/html/stocks/version_two/portfolios/table_dump/'.$systemTable.'.sql ';
+$ex2 = 'mysqldump -u root -pbenny collective2 '.$optTable.' >    /var/www/html/stocks/version_two/portfolios/table_dump/'.$optTable.'.sql';
 echo exec($ex);
 echo exec($ex2);
 
-$ex = 'node /var/www/html/amazon/admin/send_table_to_web.js local_stocks';
+$ex = 'node /var/www/html/amazon/admin/send_table_to_web.js '.$systemTable.'';
     echo "\n" . $ex . "\n";
     echo exec($ex);
-$ex = 'node /var/www/html/amazon/admin/send_table_to_web.js opt';
+$ex = 'node /var/www/html/amazon/admin/send_table_to_web.js '.$optTable.'';
     echo "\n" . $ex . "\n";
     echo exec($ex);
 
-    $ex = 'cd /var/www/stock_BlueSky/load_initial_stocks/ && php upload_table.php local_stocks';
+    $ex = 'cd /var/www/html/stocks/load_initial_stocks/ && php upload_table.php '.$systemTable.'';
     echo exec($ex);
 
-  $ex = 'cd /var/www/stock_BlueSky/load_initial_stocks/ && php upload_table.php opt';
+  $ex = 'cd /var/www/html/stocks/load_initial_stocks/ && php upload_table.php '.$optTable.'';
     echo exec($ex);
 
   $date = date('Y-m-d H:i:s');
-  echo "The time is: ".$date = date('Y-m-d H:i:s') . "\n";  
+  echo "The time is: ".$date = date('Y-m-d H:i:s') . "\n";
 
 /*Notes*/
 // signal =>  array(action=>"SSHORT")

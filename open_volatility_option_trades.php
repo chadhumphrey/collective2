@@ -7,6 +7,13 @@ require '/var/www/html/vendor/autoload.php';
 require_once("/var/www/html/stocks/constants.php");
 include("queries.php");
 
+use \Curl\Curl;
+$curl = new Curl();
+
+require_once("/var/www/html/collective2/calc.php");
+$calc = new CALCULATION();
+
+
 //New Mysqli Connection
 $db = mysqli_connect(DB_SERVER, DB_USER, DB_PASS, "collective2");
 if (!$db) {
@@ -15,22 +22,16 @@ if (!$db) {
     echo "Debugging error: " . mysqli_connect_error() . PHP_EOL;
     exit;
 }
-use \Curl\Curl;
 
-$curl = new Curl();
-
-require_once("/var/www/html/collective2/calc.php");
-$calc = new CALCULATION();
+$systemId = $calc->get_system($argv[1]);
 
 //Get options one month in advance.
-$next_month = date('m', strtotime('+1 months'));
-$array_ids = array('AZO170922C00562500','AZO170922C00575000','TDG171117P00230000');
+$array_ids = array('PXD180316C00145000','TQQQ180119P00064500','TQQQ180119P00065500', 'TQQQ180119P00066500');
 $precent_increase = .95;
 foreach ($array_ids as $id) {
     $q = 'select * from options2017.options_HighIVOL where symbol = "'.$id.'"';
     $result = $db->query($q);
     $calc->db_error_test($result, $db, "29");
-
 
     foreach ($result as $r) {
         //log trade
@@ -76,7 +77,7 @@ foreach ($array_ids as $id) {
     //build signal array
     $arr = json_encode(array(
       "apikey" => "HGHo2JKR2akIJdWtPRZU_LCLrYXAanVOgLLdoDOw28NcGr_v5e",
-      "systemid" => "109963544",
+      "systemid" => $systemId,
       "signal" => array(
             "action" => "$transaction",
             "symbol" => "$C2_option_symbol",

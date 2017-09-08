@@ -196,7 +196,7 @@ class CALCULATION
         return $realOptionSymbol;
     }
 
-    public function update_price($r, $midPrice)
+    public function update_price($r, $midPrice,$optTable)
     {
         global $db;
         echo "midPrice--> ". $midPrice . "\n";
@@ -210,9 +210,45 @@ class CALCULATION
         }
         echo "% profit--> ". $profit . "\n";
 
-        $q = "update opt set actual_midPrice = $midPrice, profit_precent = $profit_precent, profit = $profit where id = $r[id];";
+        echo $q = "update $optTable set actual_midPrice = $midPrice, profit_precent = $profit_precent, profit = $profit where id = $r[id];";
         $result = $db->query($q);
         $this->db_error_test($result, $db, "214");
+    }
+
+    public function get_system($systemName)
+    {
+        switch ($systemName) {
+        case 'hardline':
+          $systemId = "109963544";
+          break;
+        case 'entropy':
+            $systemId = "113460016";
+          break;
+        case 'answer':
+            $systemId = "113494319";
+          break;
+        default:
+          die("line 228 on calc.php");
+      }
+        return $systemId;
+    }
+
+    public function get_system_table($systemName)
+    {
+        switch ($systemName) {
+        case 'hardline':
+          $table = "hardline";
+          break;
+        case 'entropy':
+          $table = "entropy";
+          break;
+        case 'answer':
+          $table = "answer";
+          break;
+        default:
+          die("line 243 on calc.php");
+      }
+        return $table;
     }
 
 

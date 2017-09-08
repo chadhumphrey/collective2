@@ -46,7 +46,7 @@ if (($number) > 0) {
         $q ='insert into options_LowIVOL () SELECT * FROM '.$table.'
         WHERE
         last != 0
-        and ally_IVOL * 100 < HV_20D
+        and ally_IVOL < HV_20D
         and strike between current_price - 50 and current_price +50
         and last > 2
         and last - ((bid+ ask)/2) >1
