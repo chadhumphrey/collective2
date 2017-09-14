@@ -174,8 +174,20 @@ class CALCULATION
         if (fmod((float)$data['strike'], 1)) {
             echo "we made it here \n";
             $strike =(float)$data['strike'] *10;
-            $strike = "00".$data['strike']."00";
-            $strike = str_replace(".", "", $strike);
+            echo "strikes! ". $strike . "\n";
+            if (strlen($strike)==3) {
+                $strike = "000".$data['strike']."00";
+                $strike = str_replace(".", "", $strike);
+                $realOptionSymbol = $data['underlying'].$year.$month.$day.$option.$strike;
+                echo $realOptionSymbol . "\n";
+                return $realOptionSymbol;
+            } else {
+                $strike = "00".$data['strike']."00";
+                $strike = str_replace(".", "", $strike);
+                $realOptionSymbol = $data['underlying'].$year.$month.$day.$option.$strike;
+                echo $realOptionSymbol . "\n";
+                return $realOptionSymbol;
+            }
         }
 
 
@@ -196,7 +208,7 @@ class CALCULATION
         return $realOptionSymbol;
     }
 
-    public function update_price($r, $midPrice,$optTable)
+    public function update_price($r, $midPrice, $optTable)
     {
         global $db;
         echo "midPrice--> ". $midPrice . "\n";

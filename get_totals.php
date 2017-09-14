@@ -115,27 +115,7 @@ echo $q = "insert into $optTable () select * from opt; ";
 $result = $db->query($q);
 $calc->db_error_test($result, $db, "117");
 
-//Send to the EC2 then import file into database
-$ex = 'mysqldump -u root -pbenny collective2 '.$systemTable.' > /var/www/html/stocks/version_two/portfolios/table_dump/'.$systemTable.'.sql ';
-$ex2 = 'mysqldump -u root -pbenny collective2 '.$optTable.' >    /var/www/html/stocks/version_two/portfolios/table_dump/'.$optTable.'.sql';
-echo exec($ex);
-echo exec($ex2);
 
-$ex = 'node /var/www/html/amazon/admin/send_table_to_web.js '.$systemTable.'';
-    echo "\n" . $ex . "\n";
-    echo exec($ex);
-$ex = 'node /var/www/html/amazon/admin/send_table_to_web.js '.$optTable.'';
-    echo "\n" . $ex . "\n";
-    echo exec($ex);
-
-    $ex = 'cd /var/www/html/stocks/load_initial_stocks/ && php upload_table.php '.$systemTable.'';
-    echo exec($ex);
-
-  $ex = 'cd /var/www/html/stocks/load_initial_stocks/ && php upload_table.php '.$optTable.'';
-    echo exec($ex);
-
-  $date = date('Y-m-d H:i:s');
-  echo "The time is: ".$date = date('Y-m-d H:i:s') . "\n";
 
 /*Notes*/
 // signal =>  array(action=>"SSHORT")
