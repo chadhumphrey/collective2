@@ -26,7 +26,7 @@ if (!$db) {
 $systemId = $calc->get_system($argv[1]);
 
 //Get options one month in advance.
-$array_ids = array('AZO170922C00570000','AZO170922C00590000','JDST171215C00091000');
+$array_ids = array('ILMN171027C00230000','ILMN180119C00240000','TNA180420P00039000','TQQQ171215P00089000');
 $precent_increase = .95;
 foreach ($array_ids as $id) {
     $q = 'select * from options2017.options_HighIVOL where symbol = "'.$id.'"';

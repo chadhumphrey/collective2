@@ -25,7 +25,7 @@ if (!$db) {
 $systemId = $calc->get_system($argv[1]);
 
 //option array
-$array_ids = array('SVXY180316C00117000','TDG180119C00300000','RE180420C00240000','ULTA180420P00210000');
+$array_ids = array('RE180420C00240000','DLR180420C00135000','SIG180420C00080000','CMG171013P00295000');
 $precent_increase = 1.0;
 foreach ($array_ids as $id) {
     $q = 'select * from options2017.options_LowIVOL where symbol = "'.$id.'"';

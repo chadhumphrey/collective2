@@ -53,6 +53,32 @@ function build_query($r)
     return $q;
 }
 
+function build_margin_query($r, $table)
+{
+    $q = 'insert into accounts (
+    buyPower,
+    marginUsed,
+    equity,
+    updatedLastTimeET,
+    ok,
+    modelAccountValue,
+    cash,
+    systemid,
+    systemName
+    ) values (
+    "'.$r->buyPower.'",
+    "'.$r->marginUsed.'",
+    "'.$r->equity.'",
+    "'.$r->updatedLastTimeET.'",
+    "'.$r->ok.'",
+    "'.$r->modelAccountValue.'",
+    "'.$r->cash.'",
+    "'.$r->systemid.'",
+    "'.$table.'")';
+
+    return $q;
+}
+
 $truncate_local_stocks= "TRUNCATE local_stocks;";
 $truncate_opt= "TRUNCATE opt;";
 
