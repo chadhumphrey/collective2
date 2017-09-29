@@ -1,2 +1,0 @@
-php open_volatility_option_trades.php entropy
-php open_low_volatility_option_trades.php entropy

@@ -79,6 +79,14 @@ function build_margin_query($r, $table)
     return $q;
 }
 
+function build_insert($r, $systemName)
+{
+  $json_obj = json_encode($r);
+  $q = 'insert into open_covered_trades (signalId,tradeData,systemName)
+  values ("'.$r->signalid.'",\''.$json_obj.'\',"'.$systemName.'")';
+  return $q;
+}
+
 $truncate_local_stocks= "TRUNCATE local_stocks;";
 $truncate_opt= "TRUNCATE opt;";
 

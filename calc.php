@@ -230,18 +230,21 @@ class CALCULATION
     public function get_system($systemName)
     {
         switch ($systemName) {
-        case 'hardline':
-          $systemId = "109963544";
-          break;
-        case 'entropy':
+          case 'hardline':
+            $systemId = "109963544";
+            break;
+          case 'generator':
+            $systemId = "109963544";
+            break;
+          case 'entropy':
             $systemId = "113460016";
-          break;
-        case 'answer':
+            break;
+          case 'answer':
             $systemId = "113494319";
-          break;
-        default:
-          die("line 228 on calc.php");
-      }
+            break;
+          default:
+            die("line 228 on calc.php");
+        }
         return $systemId;
     }
 
@@ -261,6 +264,28 @@ class CALCULATION
           die("line 243 on calc.php");
       }
         return $table;
+    }
+
+
+    public function build_c2_options($system_array)
+    {
+        global $db;
+        foreach ($system_array as $system) {
+            $systemTable = $this->get_system_table($system);
+            $optTable = "collective2.".$systemTable."_opt";
+            $q = "select underlying from $optTable";
+            $result = mysqli_query($db, $q);
+            $this->db_error_test($result, $db, "pull_optionsV17 40");
+            $number = mysqli_num_rows($result);
+            if (($number) > 0) {
+                while ($row = mysqli_fetch_assoc($result)) {
+                    $stock = $row['underlying'];
+                    $qq = 'insert ignore into DAY_TRADING_options (equity) value ("'.strtolower(trim($stock)).'")';
+                    $results = mysqli_query($db, $qq);
+                    $this->db_error_test($result, $db, "pull_c2_options 47");
+                }
+            }
+        }
     }
 
 
