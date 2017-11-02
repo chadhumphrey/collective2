@@ -1,6 +1,10 @@
-<?php require '/var/www/html/vendor/autoload.php';
+<?php
+
+echo "Why this should be here??" ; die;
+
+ require '/var/www/html/vendor/autoload.php';
 require_once("/var/www/html/stocks/constants.php");
-include("queries.php");
+include("/var/www/html/collective2/queries.php");
 
 require_once("/var/www/html/collective2/calc.php");
 $calc = new CALCULATION();
@@ -18,6 +22,10 @@ if (!$db) {
     echo "Debugging error: " . mysqli_connect_error() . PHP_EOL;
     exit;
 }
+
+//clear historic trades
+$result = $db->query('truncate trades');
+$calc->db_error_test($result, $db, "24");
 
 //Get user input on tables
 $systemId = $calc->get_system($argv[1]);

@@ -1,5 +1,5 @@
 <?php
-
+error_reporting(0);
 class CALCULATION
 {
     public function build_query($r)
@@ -157,10 +157,9 @@ class CALCULATION
         $day = substr($x, 2, 2);
         $tempMonth = $x[4];
 
-        echo $q="select id from collective2.options_symbols where `$opt` = '$tempMonth';";
+        $q="select id from collective2.options_symbols where `$opt` = '$tempMonth';";
         $month = $db->query($q)->fetch_object()->id;
-        echo strlen($month) . "<----\n";
-        echo (float)$data['strike']. "\n";
+        (float)$data['strike'];
 
         //Single digit months
         if (strlen($month)<2) {
@@ -172,7 +171,6 @@ class CALCULATION
 
         //if the strike has a decimal
         if (fmod((float)$data['strike'], 1)) {
-            echo "we made it here \n";
             $strike =(float)$data['strike'] *10;
             echo "strikes! ". $strike . "\n";
             if (strlen($strike)==3) {
@@ -208,7 +206,7 @@ class CALCULATION
         return $realOptionSymbol;
     }
 
-    public function update_price($r, $midPrice, $optTable)
+    public function update_price($r, $ex_date,$midPrice, $optTable)
     {
         global $db;
         echo "midPrice--> ". $midPrice . "\n";
@@ -222,7 +220,7 @@ class CALCULATION
         }
         echo "% profit--> ". $profit . "\n";
 
-        echo $q = "update $optTable set actual_midPrice = $midPrice, profit_precent = $profit_precent, profit = $profit where id = $r[id];";
+        $q = "update $optTable set actual_midPrice = $midPrice, profit_precent = $profit_precent, profit = $profit, ex_date = \"$ex_date\" where id = $r[id];";
         $result = $db->query($q);
         $this->db_error_test($result, $db, "214");
     }
@@ -243,7 +241,7 @@ class CALCULATION
             $systemId = "113494319";
             break;
           default:
-            die("line 228 on calc.php");
+            die("line 228 on calc.php- Meaning you didn't put in a system\n");
         }
         return $systemId;
     }
@@ -288,6 +286,41 @@ class CALCULATION
         }
     }
 
+    public function send_signal($r)
+    {
+        global $curl;
+        global $db;
+        $systemId=$r['systemId'];
+        $signalId=$r['signalId'];
+
+        $arr = json_encode(
+          array(
+          "apikey" => "HGHo2JKR2akIJdWtPRZU_LCLrYXAanVOgLLdoDOw28NcGr_v5e",
+          "systemid" => $systemId,
+          "signalid" => $signalId
+        )
+        );
+
+        $curl->setHeader('Content-Type', 'application/json');
+        $curl->post('https://api.collective2.com/world/apiv3/cancelSignal', $arr);
+        $response = $curl->response;
+
+        var_dump(($response));
+        echo "\n\n\n\n";
+
+        //delete from tables
+        $q = "delete from pending_trades where signalId  = $signalId";
+        $result = $db->query($q);
+        $this->db_error_test($result, $db, "calc 314");
+    }
+
+    public function load_pending_trades($tradeSignal, $systemName, $systemId)
+    {
+        global $db;
+        $q = "insert into pending_trades (signalId,systemName,systemId) values ('.$tradeSignal.',\"$systemName\",'.$systemId.')";
+        $result = $db->query($q);
+        $this->db_error_test($result, $db, "calc 96");
+    }
 
     public function db_error_test($results, $db, $line = null)
     {
@@ -295,7 +328,8 @@ class CALCULATION
             echo "ERROR:calc.php" . "\n";
             echo "Line Number " . $line . "\n";
             echo mysqli_error($db) . "\n";
-            return "fail";
+            return "FAIL";
+            die;
         }
     }
 } //end of class

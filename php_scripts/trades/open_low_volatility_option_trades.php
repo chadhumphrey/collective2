@@ -25,10 +25,10 @@ if (!$db) {
 $systemId = $calc->get_system($argv[1]);
 
 //option array
-$array_ids = array('EFX171103P00089000','TDG180119C00288000');
+$array_ids = array('','');
 $precent_increase = 1.0;
 foreach ($array_ids as $id) {
-    $q = 'select * from options2017.options_LowIVOL where symbol = "'.$id.'"';
+    $q = 'select * from options2017.OPTIONS_LowIVOL where symbol = "'.$id.'"';
     $result = $db->query($q);
     $calc->db_error_test($result, $db, "29");
 

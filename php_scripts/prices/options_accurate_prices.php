@@ -5,7 +5,7 @@ This script will provide accurate options prices
 **/
 require '/var/www/html/vendor/autoload.php';
 require_once("/var/www/html/stocks/constants.php");
-include("queries.php");
+include("/var/www/html/collective2/queries.php");
 use \Curl\Curl;
 $curl = new Curl();
 
@@ -37,8 +37,9 @@ foreach ($result as $r) {
     $optionData = $db->query($q);
     while ($obj = $optionData->fetch_object()) {
       $midPrice = ($obj->ask + $obj->bid)/2;
+      $ex_date = $obj->ex_date;
     }
-    $realOptionSymbol = $calc->update_price($r, $midPrice,$optTable);
+    $realOptionSymbol = $calc->update_price($r,$ex_date, $midPrice,$optTable);
 }
 
 //Send to the EC2 then import file into database

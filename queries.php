@@ -1,8 +1,62 @@
 <?php
+error_reporting(E_ALL);
 
 $truncate_trades="truncate trades;";
 
-function build_query($r)
+function build_query($r, $systemTable)
+{
+  $q = 'insert into trades (
+        closeVWAP_timestamp,
+        strike ,
+        open_or_closed ,
+        expir ,
+        openVWAP_timestamp ,
+        underlying ,
+        closing_price_VWAP ,
+        putcall ,
+        quant_closed ,
+        markToMarket_time,
+        opening_price_VWAP ,
+        trade_id ,
+        symbol ,
+        quant_opened ,
+        closedWhen ,
+        instrument ,
+        ptValue ,
+        PL,
+        closedWhenUnixTimeStamp,
+        openedWhen ,
+        long_or_short ,
+        symbol_description,
+        systemTable
+) values (
+"'.$r->closeVWAP_timestamp.'",
+"'.$r->strike.'",
+"'.$r->open_or_closed.'",
+"'.$r->expir.'",
+"'.$r->openVWAP_timestamp.'",
+"'.$r->underlying.'",
+"'.$r->closing_price_VWAP.'",
+"'.$r->putcall.'",
+"'.$r->quant_closed.'",
+"'.$r->markToMarket_time.'",
+"'.$r->opening_price_VWAP.'",
+"'.$r->trade_id.'",
+"'.$r->symbol.'",
+"'.$r->quant_opened.'",
+"'.$r->closedWhen.'",
+"'.$r->instrument.'",
+"'.$r->ptValue.'",
+"'.$r->PL.'",
+"'.$r->closedWhenUnixTimeStamp.'",
+"'.$r->openedWhen.'",
+"'.$r->long_or_short.'",
+"'.$r->symbol_description.'",
+"'.$systemTable.'")';
+    return $q;
+}
+
+function build_trade_history($r)
 {
     $q = 'insert into trades (
         closeVWAP_timestamp,
@@ -86,6 +140,7 @@ function build_insert($r, $systemName)
   values ("'.$r->signalid.'",\''.$json_obj.'\',"'.$systemName.'")';
   return $q;
 }
+
 
 $truncate_local_stocks= "TRUNCATE local_stocks;";
 $truncate_opt= "TRUNCATE opt;";

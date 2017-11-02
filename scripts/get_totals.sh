@@ -17,6 +17,7 @@ php /var/www/html/collective2/php_scripts/prices/options_accurate_prices.php ans
 
 #get margins and accounts balances of systems
 php /var/www/html/collective2/php_scripts/utility/get_margin.php
+php /var/www/html/collective2/php_scripts/utility/load_trades.php
 
 #set exit trades
 php /var/www/html/collective2/php_scripts/trades/set_option_trade_limits.php hardline

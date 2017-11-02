@@ -20,7 +20,7 @@ require_once("/var/www/html/collective2/calc.php");
 $calc = new CALCULATION();
 
 
-$q = "truncate options_HighIVOL;";
+$q = "truncate OPTIONS_HighIVOL;";
 $result = $db->query($q);
 $calc->db_error_test($result, $db, "25");
 
@@ -32,7 +32,7 @@ if (($number) > 0) {
     while ($row = mysqli_fetch_assoc($result)) {
         echo  $row['equity'] . "\n";
         $stock = $row['equity'];
-        $q = "SELECT * FROM stocks_bluesky.all_stocks_alt, options2017.equities_tracked
+        /*$q = "SELECT * FROM stocks_bluesky.all_stocks_alt, options2017.equities_tracked
         WHERE options2017.equities_tracked.equity = '$stock'
         AND stocks_bluesky.all_stocks_alt.date_results = CURRENT_DATE
         AND stocks_bluesky.all_stocks_alt.calc_equity = '$stock';";
@@ -40,10 +40,10 @@ if (($number) > 0) {
         $r = $db->query($q);
         $calc->db_error_test($r, $db, "28");
 
-        $price = $r->fetch_object()->close_results;
+        $price = $r->fetch_object()->close_results;*/
 
         $table = "options2017.".$stock."_options";
-        $q ='insert into options_HighIVOL () SELECT * FROM '.$table.'
+        $q ='insert into OPTIONS_HighIVOL () SELECT * FROM '.$table.'
         WHERE  last != 0
         and ally_IVOL > (HV_20D +9)
         and strike between current_price - 50 and current_price +50

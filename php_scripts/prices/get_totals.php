@@ -1,6 +1,6 @@
 <?php require '/var/www/html/vendor/autoload.php';
 require_once("/var/www/html/stocks/constants.php");
-include("queries.php");
+include("/var/www/html/collective2/queries.php");
 
 require_once("/var/www/html/collective2/calc.php");
 $calc = new CALCULATION();
@@ -8,7 +8,7 @@ use \Curl\Curl;
 
 $curl = new Curl();
 
-error_reporting(E_ALL);
+error_reporting(0);
 
 //New Mysqli Connection
 $db = mysqli_connect(DB_SERVER, DB_USER, DB_PASS, "collective2");
@@ -18,6 +18,8 @@ if (!$db) {
     echo "Debugging error: " . mysqli_connect_error() . PHP_EOL;
     exit;
 }
+
+
 
 //Get user input on tables
 $systemId = $calc->get_system($argv[1]);
@@ -38,7 +40,7 @@ if ($curl->error) {
     echo 'Response:' . "\n";
     $response = $curl->response;
     foreach ($response->response as $r) {
-        $insert_trades = build_query($r);
+        $insert_trades = build_query($r,$systemTable);
         $result = $db->query($insert_trades);
         $calc->db_error_test($result, $db, "56");
     }
@@ -51,6 +53,10 @@ $calc->db_error_test($result, $db, "39");
 //move
 $result = $db->query($move_to_local);
 $calc->db_error_test($result, $db, "43");
+
+//move historical
+$result = $db->query('insert into C2_historical_trades () select * from trades; ');
+$calc->db_error_test($result, $db, "61");
 
 // bring in SO algo
 $result = $db->query($update_algo);

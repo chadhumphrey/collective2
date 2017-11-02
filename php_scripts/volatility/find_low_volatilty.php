@@ -20,7 +20,7 @@ require_once("/var/www/html/collective2/calc.php");
 $calc = new CALCULATION();
 
 
-$q = "truncate options_LowIVOL;";
+$q = "truncate OPTIONS_LowIVOL;";
 $result = $db->query($q);
 $calc->db_error_test($result, $db, "25");
 
@@ -43,7 +43,7 @@ if (($number) > 0) {
         $price = $r->fetch_object()->close_results;
 
         $table = "options2017.".$stock."_options";
-        $q ='insert into options_LowIVOL () SELECT * FROM '.$table.'
+        $q ='insert into OPTIONS_LowIVOL () SELECT * FROM '.$table.'
         WHERE
         last != 0
         and ally_IVOL < HV_20D

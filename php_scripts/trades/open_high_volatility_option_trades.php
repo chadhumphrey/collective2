@@ -26,17 +26,22 @@ if (!$db) {
 $systemId = $calc->get_system($argv[1]);
 
 //Get options one month in advance.
-$array_ids = array('ILMN171027C00230000','ILMN180119C00240000','TNA180420P00039000','TQQQ171215P00089000');
+$options_array = array(array('ILMN180615C00230000',1),
+array('AZO171208C00605000',1),
+array('PXD171208P00138000',2),
+array('TDG180119P00238000',1),
+
+);
 $precent_increase = .95;
-foreach ($array_ids as $id) {
-    $q = 'select * from options2017.options_HighIVOL where symbol = "'.$id.'"';
+foreach ($options_array as $val) {
+    $q = 'select * from options2017.OPTIONS_HighIVOL where symbol = "'.$val[0].'"';
     $result = $db->query($q);
     $calc->db_error_test($result, $db, "29");
 
     foreach ($result as $r) {
         //log trade
         $date = date('Y-m-d', time());
-        echo $q = 'insert into options2017.traded_option (symbol, date_of_quote) value ("'.$id.'", "'.$date.'" );';
+        echo $q = 'insert into options2017.traded_option (symbol, date_of_quote) value ("'.$val[0].'", "'.$date.'" );';
         $insert = $db->query($q);
         $calc->db_error_test($insert, $db, "41");
 
@@ -84,7 +89,7 @@ foreach ($array_ids as $id) {
             "typeofsymbol" => "option",
             "$condition" => "$target_price",
             "duration" => "DAY",
-            "quant" => 2
+            "quant" => $val[1]
           ),
         )
       );
@@ -94,6 +99,6 @@ foreach ($array_ids as $id) {
         $curl->setHeader('Content-Type', 'application/json');
         $curl->post('https://api.collective2.com/world/apiv3/submitSignal', $arr);
         $response = $curl->response;
-        // var_dump($response)."\n";
+         var_dump($response)."\n";
     } //foreach results
 } //foreach array_ids

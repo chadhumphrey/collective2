@@ -2,8 +2,9 @@
 /**
 **
 This script queries systems tables (hardline, answer, entropy) to check accurate prices
--Based on accurate prices it sets trades
+-Based on accurate prices it sets trades, meaning it takes profits.
 **/
+error_reporting(E_ALL);
 require '/var/www/html/vendor/autoload.php';
 require_once("/var/www/html/stocks/constants.php");
 include("/var/www/html/collective2/queries.php");
@@ -25,18 +26,31 @@ if (!$db) {
 //Get user input on tables
 $systemTable = $calc->get_system_table($argv[1]);
 $systemId = $calc->get_system($argv[1]);
-
 $optTable = $systemTable."_opt";
 
-$q = "select * from collective2.$optTable";
+
+//Cancel existing trades
+$q = "select * from pending_trades where systemId = $systemId";
+$result = $db->query($q);
+$calc->db_error_test($result, $db, "25");
+foreach ($result as $r) {
+  $calc->send_signal($r);
+}
+sleep(10);
+
+//Start order creation
+$q = "SELECT collective2.$optTable.*
+FROM do_not_trade_opt,collective2.$optTable
+where do_not_trade_opt.symbol != collective2.$optTable.symbol
+
 $result = $db->query($q);
 $calc->db_error_test($result, $db, "25");
 
-$precent_increase = .90;
-$precent_decrease = .90;
+$precent_increase = 1;
+$precent_decrease = 1;
 
 foreach ($result as $r) {
-    if ($r['profit_precent'] >= 60) {
+    if ($r['profit_precent'] >= 40) {
         echo "profit ---> ".$r['profit'] . "\n";
         $transaction = "BTO";
         if ($r['long_or_short']=='short') {
@@ -70,6 +84,10 @@ foreach ($result as $r) {
         $curl->setHeader('Content-Type', 'application/json');
         $curl->post('https://api.collective2.com/world/apiv3/submitSignal', $arr);
         $response = $curl->response;
-        var_dump($response)."\n";
+        $tradeSignal =$response->signalid;
+        $calc->load_pending_trades($tradeSignal, $systemTable,$systemId);
+
+        //var_dump($response)."\n";
+        // $tradeSignal =$response->signalid ;
     } //foreach results
 } //foreach array_ids
