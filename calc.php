@@ -286,6 +286,27 @@ class CALCULATION
         }
     }
 
+    public function build_IB_options()
+    {
+        global $db;
+        foreach ($system_array as $system) {
+            $systemTable = $this->get_system_table($system);
+            $optTable = "InteractiveB.IB_opt";
+            $q = "select symbol from $optTable";
+            $result = mysqli_query($db, $q);
+            $this->db_error_test($result, $db, "calc 297");
+            $number = mysqli_num_rows($result);
+            if (($number) > 0) {
+                while ($row = mysqli_fetch_assoc($result)) {
+                    $stock = $row['symbol'];
+                    $qq = 'insert ignore into DAY_TRADING_options (equity) value ("'.strtolower(trim($stock)).'")';
+                    $results = mysqli_query($db, $qq);
+                    $this->db_error_test($result, $db, "pull_c2_options 47");
+                }
+            }
+        }
+    }
+
     public function send_signal($r)
     {
         global $curl;
@@ -319,11 +340,20 @@ class CALCULATION
         global $db;
         $q = "insert into pending_trades (signalId,systemName,systemId) values ('.$tradeSignal.',\"$systemName\",'.$systemId.')";
         $result = $db->query($q);
-        $this->db_error_test($result, $db, "calc 96");
+        $this->db_error_test($result, $db, "calc 322");
+    }
+
+    public function load_pending_covered_trades($tradeSignal, $systemName, $systemId)
+    {
+        global $db;
+        $q = "insert into pending_covered_trades (signalId,systemName,systemId) values ('.$tradeSignal.',\"$systemName\",'.$systemId.')";
+        $result = $db->query($q);
+        $this->db_error_test($result, $db, "calc 330");
     }
 
     public function db_error_test($results, $db, $line = null)
     {
+      global $db;
         if (!$results) {
             echo "ERROR:calc.php" . "\n";
             echo "Line Number " . $line . "\n";

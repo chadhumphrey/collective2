@@ -30,9 +30,7 @@ $systemTable = $calc->get_system_table($argv[1]);
 
 
 $array_ids = array(
-  array('stock'=>'amzn','opt_symbol'=>'AMZN171103P00950000','quantity'=>2),
-  array('stock'=>'amzn','opt_symbol'=>'AMZN171027P00950000','quantity'=>2),
-  array('stock'=>'incy','opt_symbol'=>'INCY171117P00110000','quantity'=>4),
+  array('stock'=>'ulta','opt_symbol'=>'ULTA180316P00195000','quantity'=>2),
 );
 $precent_increase = .95;
 $precent_decrease = .90;

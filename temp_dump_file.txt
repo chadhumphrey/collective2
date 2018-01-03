@@ -1,0 +1,13 @@
+insert ignore into b_t_t (
+	v_id,
+	channelID,
+	video_id,
+	website_title,
+	description,
+	channelTitle,
+	catId,
+	date_published_website,
+	publishAt,
+	tags,
+	video_slug)
+	VALUES ;

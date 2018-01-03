@@ -18,11 +18,18 @@ php /var/www/html/collective2/php_scripts/prices/options_accurate_prices.php ans
 #get margins and accounts balances of systems
 php /var/www/html/collective2/php_scripts/utility/get_margin.php
 php /var/www/html/collective2/php_scripts/utility/load_trades.php
+php /var/www/html/collective2/php_scripts/utility/load_trades_IB.php
 
 #set exit trades
 php /var/www/html/collective2/php_scripts/trades/set_option_trade_limits.php hardline
 php /var/www/html/collective2/php_scripts/trades/set_option_trade_limits.php entropy
 php /var/www/html/collective2/php_scripts/trades/set_option_trade_limits.php answer
+
+#set rebalance/cover trades
+php /var/www/html/collective2/php_scripts/trades/open_rebalance_trade.php hardline
+php /var/www/html/collective2/php_scripts/trades/open_rebalance_trade.php entropy
+php /var/www/html/collective2/php_scripts/trades/open_rebalance_trade.php answer
+
 
 echo "Start time : $start"
 now=$(date +"%T")

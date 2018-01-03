@@ -26,13 +26,11 @@ if (!$db) {
 $systemId = $calc->get_system($argv[1]);
 
 //Get options one month in advance.
-$options_array = array(array('ILMN180615C00230000',1),
-array('AZO171208C00605000',1),
-array('PXD171208P00138000',2),
-array('TDG180119P00238000',1),
-
+$options_array = array(
+array('ADSK180720C00130000',2),
+array('AZO180112P00667500',2),
 );
-$precent_increase = .95;
+$precent_increase = 1.05;
 foreach ($options_array as $val) {
     $q = 'select * from options2017.OPTIONS_HighIVOL where symbol = "'.$val[0].'"';
     $result = $db->query($q);

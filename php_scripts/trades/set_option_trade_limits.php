@@ -39,10 +39,7 @@ foreach ($result as $r) {
 sleep(10);
 
 //Start order creation
-$q = "SELECT collective2.$optTable.*
-FROM do_not_trade_opt,collective2.$optTable
-where do_not_trade_opt.symbol != collective2.$optTable.symbol
-
+$q = "SELECT collective2.$optTable.* FROM collective2.$optTable where collective2.$optTable.symbol NOT IN (SELECT do_not_trade_opt.symbol FROM do_not_trade_opt) ";
 $result = $db->query($q);
 $calc->db_error_test($result, $db, "25");
 
@@ -50,7 +47,7 @@ $precent_increase = 1;
 $precent_decrease = 1;
 
 foreach ($result as $r) {
-    if ($r['profit_precent'] >= 40) {
+    if ($r['profit_precent'] >= 50) {
         echo "profit ---> ".$r['profit'] . "\n";
         $transaction = "BTO";
         if ($r['long_or_short']=='short') {

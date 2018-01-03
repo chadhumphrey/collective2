@@ -29,6 +29,14 @@ $systemId = $calc->get_system($argv[1]);
 $systemTable = $calc->get_system_table($argv[1]);
 $optTable = $systemTable."_opt";
 
+//Cancel existing trades
+$q = "select * from pending_covered_trades where systemId = $systemId";
+$result = $db->query($q);
+$calc->db_error_test($result, $db, "25");
+foreach ($result as $r) {
+  $calc->send_signal($r);
+}
+
 //Get options one month in advance.
 $precent_increase = .95;
 $precent_decrease = .90;
