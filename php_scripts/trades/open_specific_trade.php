@@ -30,7 +30,7 @@ $systemTable = $calc->get_system_table($argv[1]);
 
 
 $array_ids = array(
-  array('stock'=>'ulta','opt_symbol'=>'ULTA180316P00195000','quantity'=>2),
+  array('stock'=>'cmg','opt_symbol'=>'CMG180209C00350000','quantity'=>4),
 );
 $precent_increase = .95;
 $precent_decrease = .90;
@@ -56,6 +56,8 @@ foreach ($array_ids as $a) {
             $transaction = "BTO";
             $exDate = $r['ex_date'];
             $target_price = (($r['bid']+$r['ask'])/2)*$precent_increase;
+            $strike =$calc->strike_type($r['strike']);
+
             break;
           case 'put':
             $strike =$calc->strike_type($r['strike']);
@@ -104,7 +106,7 @@ foreach ($array_ids as $a) {
         $insert_trade = build_insert($response, $systemTable);
         $result = $db->query($insert_trade);
         $calc->db_error_test($result, $db, "117");
-        //var_dump($response)."\n";
+        var_dump($response)."\n";
         $tradeSignal =$response->signalid ;
 
         /*
@@ -112,31 +114,31 @@ foreach ($array_ids as $a) {
         */
 
         //build C2 options symbol
-        $option_month_query =$calc->option_symbol_query($action, $d['month']);
-        $day =$calc->add_zero_digit($d['day']);
-        $C2_option_month_symbol = $db->query($option_month_query)->fetch_object()->symbol;
-        $cover_C2_option_symbol = strtoupper(trim($r['equity'])).$year.$day.$C2_option_month_symbol.$cover_strike;
-
-        //build signal array
-        $arr = json_encode(array(
-          "apikey" => "HGHo2JKR2akIJdWtPRZU_LCLrYXAanVOgLLdoDOw28NcGr_v5e",
-          "systemid" => $systemId,
-          "signal" => array(
-                "action" => "$cover_transaction",
-                "symbol" => "$cover_C2_option_symbol",
-                "typeofsymbol" => "option",
-                "$cover_condition" => "$cover_target_price",
-                "duration" => "GTC",
-                "quant" => 2,
-                "conditionalupon" =>$tradeSignal
-              ),
-            )
-          );
-            // // var_dump(json_decode($arr));
-            // echo "\n\n\n\n";
-
-            $curl->setHeader('Content-Type', 'application/json');
-        $curl->post('https://api.collective2.com/world/apiv3/submitSignal', $arr);
-        $response = $curl->response;
+        // $option_month_query =$calc->option_symbol_query($action, $d['month']);
+        // $day =$calc->add_zero_digit($d['day']);
+        // $C2_option_month_symbol = $db->query($option_month_query)->fetch_object()->symbol;
+        // $cover_C2_option_symbol = strtoupper(trim($r['equity'])).$year.$day.$C2_option_month_symbol.$cover_strike;
+        //
+        // //build signal array
+        // $arr = json_encode(array(
+        //   "apikey" => "HGHo2JKR2akIJdWtPRZU_LCLrYXAanVOgLLdoDOw28NcGr_v5e",
+        //   "systemid" => $systemId,
+        //   "signal" => array(
+        //         "action" => "$cover_transaction",
+        //         "symbol" => "$cover_C2_option_symbol",
+        //         "typeofsymbol" => "option",
+        //         "$cover_condition" => "$cover_target_price",
+        //         "duration" => "GTC",
+        //         "quant" => 2,
+        //         "conditionalupon" =>$tradeSignal
+        //       ),
+        //     )
+        //   );
+        //     // // var_dump(json_decode($arr));
+        //     // echo "\n\n\n\n";
+        //
+        //     $curl->setHeader('Content-Type', 'application/json');
+        // $curl->post('https://api.collective2.com/world/apiv3/submitSignal', $arr);
+        // $response = $curl->response;
     } //foreach results
 } //foreach array_ids

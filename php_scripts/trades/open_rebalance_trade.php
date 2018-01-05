@@ -39,8 +39,6 @@ foreach ($result as $r) {
 }
 
 
-
-
 echo $q = "select * from $optTable where profit_precent <= -40 and long_or_short = 'short'  ;";
 $result = $db->query($q);
 $number = mysqli_num_rows($result);

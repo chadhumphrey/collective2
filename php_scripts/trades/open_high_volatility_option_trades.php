@@ -27,8 +27,11 @@ $systemId = $calc->get_system($argv[1]);
 
 //Get options one month in advance.
 $options_array = array(
-array('ADSK180720C00130000',2),
-array('AZO180112P00667500',2),
+array('INCY180615C00125000',2),
+array('TQQQ180615P00106000',2),
+array('TNA180720P00053000',2),
+array('SPY180928P00233000',2),
+array('ADS180615P00220000',2),
 );
 $precent_increase = 1.05;
 foreach ($options_array as $val) {
