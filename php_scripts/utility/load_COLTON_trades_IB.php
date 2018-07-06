@@ -25,14 +25,12 @@ if (!$db) {
 
 
 //Send to the EC2 then import file into database
-$ex = 'mysqldump -u root -pbenny InteractiveB IB_opt > /var/www/html/stocks/version_two/portfolios/table_dump/IB_opt.sql ';
+$ex = 'mysqldump -u root -pbenny InteractiveColton IB_opt > /var/www/html/stocks/version_two/portfolios/table_dump/IB_optCOLTON.sql ';
 echo exec($ex);
 
-$ex = 'node /var/www/html/amazon/admin/send_table_to_web.js IB_opt';
+$ex = 'node /var/www/html/amazon/admin/send_table_to_web.js IB_optCOLTON';
 echo "\n" . $ex . "\n";
 echo exec($ex);
 
-$ex = 'cd /var/www/html/stocks/load_initial_stocks/ && php upload_table.php IB_opt';
+$ex = 'cd /var/www/html/stocks/load_initial_stocks/ && php upload_table.php IB_optCOLTON';
 echo exec($ex);
-
-echo "Success next_day_trades";

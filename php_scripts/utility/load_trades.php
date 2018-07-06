@@ -35,6 +35,17 @@ echo exec($ex);
 $ex = 'cd /var/www/html/stocks/load_initial_stocks/ && php upload_table.php C2_historical_trades';
 echo exec($ex);
 
+//Send to the EC2 then import file into database
+// $ex = 'mysqldump -u root -pbenny InteractiveB upcoming_earnings > /var/www/html/stocks/version_two/portfolios/table_dump/upcoming_earnings.sql ';
+// echo exec($ex);
+//
+// $ex = 'node /var/www/html/amazon/admin/send_table_to_web.js upcoming_earnings';
+// echo "\n" . $ex . "\n";
+// echo exec($ex);
+//
+// $ex = 'cd /var/www/html/stocks/load_initial_stocks/ && php upload_table.php upcoming_earnings';
+// echo exec($ex);
+
 //clear historic trades
 $result = $db->query('truncate C2_historical_trades');
 $calc->db_error_test($result, $db, "25");

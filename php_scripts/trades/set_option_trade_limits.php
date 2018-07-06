@@ -47,7 +47,7 @@ $precent_increase = 1;
 $precent_decrease = 1;
 
 foreach ($result as $r) {
-    if ($r['profit_precent'] >= 50) {
+    if ($r['profit_precent'] >= 40) {
         echo "profit ---> ".$r['profit'] . "\n";
         $transaction = "BTO";
         if ($r['long_or_short']=='short') {

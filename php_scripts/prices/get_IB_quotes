@@ -1,0 +1,87 @@
+<?php
+
+/*
+  3/14/17: get options from yahoo query, then make appropriate calculations.
+  4/28/17: script now retrieves stocks from stocks DB, and then retrieves default_graph_version
+  from yahoo, to know where the midpice is for automated trades.
+  5/31/17: originally started with the yahoo script, but moved this over to the ally api.
+  Ally api was the only major thing that changed, most of the functions where repurposed.
+ *  */
+
+error_reporting(0);
+//query from collective2 folder
+include '/var/www/html/collective2/queries.php';
+
+date_default_timezone_set('America/Denver');
+$start = (float) array_sum(explode(" ", microtime()));
+require_once("/var/www/html/stocks/SRC/db_connect.php");
+$bd = new DB_CONNECTION;
+$db = $bd->_get_connection("options2017");
+$start = (float) array_sum(explode(" ", microtime()));
+
+include '/var/www/html/optionsV17/calc/version_2/make_theo_for_loop.php';
+include '/var/www/html/optionsV17/options_class.php';
+$extractor = new option_generator;
+
+include '/var/www/html/ally/ally_class.php';
+$TK = new tradeKing();
+
+require_once("/var/www/html/collective2/calc.php");
+$calc = new CALCULATION();
+
+//load stocks
+// $result = mysqli_query($db, $load_equities_to_track_options);
+// $calc->db_error_test($result, $db, "pull_optionsV17 32");
+
+/*Feature is not being used any more*/
+//$q = "truncate VOLUME_options;";
+//$clear_options = mysqli_query($db, $q);
+
+$q = "truncate WEEKLY_ivolatility_averages;";
+$clear_options = mysqli_query($db, $q);
+
+
+
+$q = "SELECT equity_name from stocks_bluesky.list_of_equities_tracked where equity_name != 'spx' ;";
+$result = mysqli_query($db, $q);
+$number = mysqli_num_rows($result);
+$x =0;
+if (($number) > 0) {
+    while ($row = mysqli_fetch_assoc($result)) {
+      $start_loop = (float) array_sum(explode(" ", microtime()));
+      $stock = $row['equity_name'];
+
+      //Clear dump table
+      $q = "truncate OPTIONS_SCRAPE;";
+      $clear_options = mysqli_query($db, $q);
+
+      //Query Quotes
+      $json_quotes =$TK->get_options($stock);
+
+      //Load quotes into DB
+      $extractor->ally_quotes($json_quotes);
+
+      //Admin corrections;
+      $extractor->update_options_table($stock);
+
+      //Calculate IVOL
+      $extractor->IVOL();
+
+      // Send to individual table
+      $extractor->send_to_table($stock);
+
+      //Find ivolatility for weeks
+      $extractor->calculate_weekly_IVOL($stock);
+
+      echo $stock . "\n";
+      echo $x++ ."/".$number . "\n";
+      $end_loop = (float) array_sum(explode(" ", microtime()));
+      echo "Foreach loop: " . sprintf("%.4f", ($end_loop - $start_loop)) . " seconds:  $stock \n";
+    }
+
+}
+
+$end = (float) array_sum(explode(" ", microtime()));
+echo "Final Processing time: " . sprintf("%.4f", ($end - $start)) . " seconds\n";
+
+echo date("Y-m-d H:i:s") . "\n";

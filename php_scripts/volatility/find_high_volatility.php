@@ -4,7 +4,7 @@
 This script opens options tables and looks for High IV and HV miss match.
 **/
 require_once("/var/www/html/stocks/constants.php");
-include("queries.php");
+//include("queries.php");
 
 //New Mysqli Connection
 $db = mysqli_connect(DB_SERVER, DB_USER, DB_PASS, "options2017");
